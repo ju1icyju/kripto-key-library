@@ -1,8 +1,8 @@
 import { ethers } from 'ethers';
 
 const NETWORKS = [
-    { name: 'ETH', url: 'https://eth.llamarpc.com', ticker: 'ETH' },
-    { name: 'BNB', url: 'https://binance.llamarpc.com', ticker: 'BNB' }
+    { name: 'ETH', url: 'https://rpc.ankr.com/eth', ticker: 'ETH' },
+    { name: 'BNB', url: 'https://bsc-dataseed1.binance.org/', ticker: 'BNB' }
 ];
 
 // JSON-RPC Payload Builder
