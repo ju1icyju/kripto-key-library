@@ -4,7 +4,6 @@
 
 ![Preview](public/vite.svg)
 
-ju1icyju.github.io/kripto-key-library/
 
 ## 🌌 Overview
 
