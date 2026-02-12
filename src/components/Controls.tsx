@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Search, Shuffle, ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Shuffle, ArrowRight, ArrowLeft, MousePointerClick } from 'lucide-react';
 import { MAX_PAGE } from '../utils/crypto';
 
 interface ControlsProps {
@@ -9,13 +9,20 @@ interface ControlsProps {
 
 export const Controls: React.FC<ControlsProps> = ({ currentPage, onPageChange }) => {
     const [inputPage, setInputPage] = useState('');
+    const [randomClicks, setRandomClicks] = useState(0);
+
+    useEffect(() => {
+        const stored = localStorage.getItem('ukl_random_clicks');
+        if (stored) setRandomClicks(parseInt(stored));
+    }, []);
 
     const handleRandom = () => {
-        // Generate a random page between 1 and MAX_PAGE (approx 10^77)
-        // Since Math.random is not enough for 2^256, we'll use a trick.
-        // We want a large random BigInt.
-        // Let's generate 32 random bytes and mod by MAX_PAGE.
+        // Increment counter
+        const newCount = randomClicks + 1;
+        setRandomClicks(newCount);
+        localStorage.setItem('ukl_random_clicks', newCount.toString());
 
+        // Generate a random page
         const run = () => {
             const array = new Uint8Array(32);
             crypto.getRandomValues(array);
@@ -25,6 +32,20 @@ export const Controls: React.FC<ControlsProps> = ({ currentPage, onPageChange })
             onPageChange(page.toString());
         };
         run();
+    };
+
+    const handlePrev = () => {
+        const current = BigInt(currentPage);
+        if (current > 1n) {
+            onPageChange((current - 1n).toString());
+        }
+    };
+
+    const handleNext = () => {
+        const current = BigInt(currentPage);
+        if (current < MAX_PAGE) {
+            onPageChange((current + 1n).toString());
+        }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -43,29 +64,60 @@ export const Controls: React.FC<ControlsProps> = ({ currentPage, onPageChange })
     };
 
     return (
-        <div className="flex flex-col md:flex-row gap-4 mb-6 glass-panel p-4 rounded-lg">
-            <button
-                onClick={handleRandom}
-                className="flex items-center justify-center gap-2 bg-terminal-accent/10 border border-terminal-accent text-terminal-accent px-6 py-3 rounded hover:bg-terminal-accent hover:text-black transition-all font-bold uppercase tracking-wider text-glow-accent"
-            >
-                <Shuffle className="w-4 h-4" /> СЛУЧАЙНАЯ СТРАНИЦА
-            </button>
-
-            <form onSubmit={handleSubmit} className="flex-grow flex gap-2">
-                <div className="relative flex-grow">
-                    <input
-                        type="text"
-                        value={inputPage}
-                        onChange={(e) => setInputPage(e.target.value)}
-                        placeholder={`ПЕРЕЙТИ К СТРАНИЦЕ (ТЕКУЩАЯ: ${currentPage})`}
-                        className="w-full bg-black/50 border border-white/10 text-white px-4 py-3 pl-10 rounded focus:outline-none focus:border-terminal-accent font-mono placeholder-gray-600 transition-colors"
-                    />
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+        <div className="flex flex-col gap-4 mb-6">
+            <div className="flex flex-col md:flex-row gap-4 glass-panel p-4 rounded-lg items-center">
+                {/* Random Button & Counter */}
+                <div className="flex flex-col gap-1 w-full md:w-auto">
+                    <button
+                        onClick={handleRandom}
+                        className="flex items-center justify-center gap-2 bg-terminal-accent/10 border border-terminal-accent text-terminal-accent px-6 py-3 rounded hover:bg-terminal-accent hover:text-black transition-all font-bold uppercase tracking-wider text-glow-accent whitespace-nowrap"
+                    >
+                        <Shuffle className="w-4 h-4" /> СЛУЧАЙНАЯ СТРАНИЦА
+                    </button>
+                    {randomClicks > 0 && (
+                        <div className="flex items-center justify-center gap-1 text-[10px] text-terminal-dim uppercase tracking-widest opacity-70">
+                            <MousePointerClick className="w-3 h-3" />
+                            КЛИКОВ: <span className="text-terminal-accent">{randomClicks}</span>
+                        </div>
+                    )}
                 </div>
-                <button type="submit" className="border border-white/20 text-white px-6 py-3 rounded hover:bg-white/10 transition-colors">
-                    <ArrowRight className="w-4 h-4" />
-                </button>
-            </form>
+
+                {/* Navigation and Search */}
+                <div className="flex-grow flex gap-2 w-full">
+                    <button
+                        onClick={handlePrev}
+                        disabled={currentPage === '1'}
+                        className="border border-white/20 text-white px-4 py-3 rounded hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Предыдущая страница"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                    </button>
+
+                    <form onSubmit={handleSubmit} className="flex-grow flex gap-2 relative">
+                        <div className="relative flex-grow">
+                            <input
+                                type="text"
+                                value={inputPage}
+                                onChange={(e) => setInputPage(e.target.value)}
+                                placeholder={`...`}
+                                className="w-full bg-black/50 border border-white/10 text-white px-4 py-3 pl-10 rounded focus:outline-none focus:border-terminal-accent font-mono placeholder-gray-600 transition-colors text-center"
+                            />
+                            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                        </div>
+                        <button type="submit" className="border border-white/20 text-white px-4 py-3 rounded hover:bg-white/10 transition-colors">
+                            ПЕРЕЙТИ
+                        </button>
+                    </form>
+
+                    <button
+                        onClick={handleNext}
+                        className="border border-white/20 text-white px-4 py-3 rounded hover:bg-white/10 transition-colors"
+                        title="Следующая страница"
+                    >
+                        <ArrowRight className="w-4 h-4" />
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };
