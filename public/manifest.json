@@ -1,0 +1,21 @@
+{
+    "name": "Universal Key Library",
+    "short_name": "KeyLibrary",
+    "start_url": "./",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#00ffff",
+    "description": "Explore the vast universe of private keys. Search for Bitcoin and Ethereum lost treasures.",
+    "icons": [
+        {
+            "src": "vite.svg",
+            "sizes": "192x192",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "vite.svg",
+            "sizes": "512x512",
+            "type": "image/svg+xml"
+        }
+    ]
+}

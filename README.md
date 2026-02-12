@@ -1,73 +1,52 @@
-# React + TypeScript + Vite
+# Universal Key Library (keys-lmao) 🗝️
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **Explore the vast universe of numbers. Search for lost treasures in the noise.**
 
-Currently, two official plugins are available:
+![Preview](public/vite.svg)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🌌 Overview
 
-## React Compiler
+**Universal Key Library** is a visual interface for the $2^{256}$ private key space of Bitcoin and Ethereum. It demonstrates the sheer immensity of cryptographic security through a "Dark Sci-Fi" terminal interface.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Every possible private key exists somewhere in this library. The problem is finding one with a balance.
 
-## Expanding the ESLint configuration
+**Live Demo:** [https://ju1icyju.github.io/kripto-key-library/](https://ju1icyju.github.io/kripto-key-library/)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## ✨ Features
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+*   **Real-Time Data:** Uses public JSON-RPC nodes (Ankr, Binance) to check balances for 128 keys at a time.
+*   **Visual Interface:** "Matrix-style" scanning effects, CRT monitors, and glassmorphism UI.
+*   **Zero Logs:** 100% Client-Side. Private keys are generated locally in your browser and never sent to any server.
+*   **Educational:** Learn about the math behind $2^{256}$ and why "brute-forcing" crypto is impossible.
+*   **Gamification:** Persisted "Random Clicks" counter to track your journey through the void.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 🛠️ Tech Stack
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+*   **Core:** React + TypeScript + Vite
+*   **Styling:** TailwindCSS (v4)
+*   **Crypto:** `ethers.js`, `bitcoinjs-lib`, `tiny-secp256k1`
+*   **Deployment:** GitHub Pages
+
+## 🚀 Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start local server
+npm run dev
+
+# Build for production
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## ⚠️ Disclaimer
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+**This project is for educational purposes only.**
+The probability of finding a private key with a balance is effectively zero ($1$ in $10^{77}$).
+Do not use this tool to generate wallets for storing real funds.
+Never share your private keys found here or elsewhere.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 📄 License
+
+MIT License. Free to explore, fork, and learn.
