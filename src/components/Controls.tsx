@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Search, Shuffle, ArrowRight, ArrowLeft, MousePointerClick } from 'lucide-react';
 import { MAX_PAGE } from '../utils/crypto';
+import { incrementRandomClicks } from '../utils/supabase';
+import { useLang } from '../utils/i18n';
 
 interface ControlsProps {
     currentPage: string;
@@ -10,6 +12,7 @@ interface ControlsProps {
 export const Controls: React.FC<ControlsProps> = ({ currentPage, onPageChange }) => {
     const [inputPage, setInputPage] = useState('');
     const [randomClicks, setRandomClicks] = useState(0);
+    const { t } = useLang();
 
     useEffect(() => {
         const stored = localStorage.getItem('ukl_random_clicks');
@@ -17,10 +20,13 @@ export const Controls: React.FC<ControlsProps> = ({ currentPage, onPageChange })
     }, []);
 
     const handleRandom = () => {
-        // Increment counter
+        // Increment local counter
         const newCount = randomClicks + 1;
         setRandomClicks(newCount);
         localStorage.setItem('ukl_random_clicks', newCount.toString());
+
+        // Increment global counter (fire-and-forget)
+        incrementRandomClicks();
 
         // Generate a random page
         const run = () => {
@@ -52,7 +58,6 @@ export const Controls: React.FC<ControlsProps> = ({ currentPage, onPageChange })
         e.preventDefault();
         try {
             if (!inputPage) return;
-            // Allow hex input if starts with 0x
             let page = BigInt(inputPage);
             if (page < 1n) page = 1n;
             if (page > MAX_PAGE) page = MAX_PAGE;
@@ -72,12 +77,12 @@ export const Controls: React.FC<ControlsProps> = ({ currentPage, onPageChange })
                         onClick={handleRandom}
                         className="flex items-center justify-center gap-2 bg-terminal-accent/10 border border-terminal-accent text-terminal-accent px-6 py-3 rounded hover:bg-terminal-accent hover:text-black transition-all font-bold uppercase tracking-wider text-glow-accent whitespace-nowrap"
                     >
-                        <Shuffle className="w-4 h-4" /> СЛУЧАЙНАЯ СТРАНИЦА
+                        <Shuffle className="w-4 h-4" /> {t.randomPage}
                     </button>
                     {randomClicks > 0 && (
                         <div className="flex items-center justify-center gap-1 text-[10px] text-terminal-dim uppercase tracking-widest opacity-70">
                             <MousePointerClick className="w-3 h-3" />
-                            КЛИКОВ: <span className="text-terminal-accent">{randomClicks}</span>
+                            {t.clicks} <span className="text-terminal-accent">{randomClicks}</span>
                         </div>
                     )}
                 </div>
@@ -88,7 +93,7 @@ export const Controls: React.FC<ControlsProps> = ({ currentPage, onPageChange })
                         onClick={handlePrev}
                         disabled={currentPage === '1'}
                         className="border border-white/20 text-white px-4 py-3 rounded hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                        title="Предыдущая страница"
+                        title={t.prevPage}
                     >
                         <ArrowLeft className="w-4 h-4" />
                     </button>
@@ -105,14 +110,14 @@ export const Controls: React.FC<ControlsProps> = ({ currentPage, onPageChange })
                             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                         </div>
                         <button type="submit" className="border border-white/20 text-white px-4 py-3 rounded hover:bg-white/10 transition-colors">
-                            ПЕРЕЙТИ
+                            {t.goTo}
                         </button>
                     </form>
 
                     <button
                         onClick={handleNext}
                         className="border border-white/20 text-white px-4 py-3 rounded hover:bg-white/10 transition-colors"
-                        title="Следующая страница"
+                        title={t.nextPage}
                     >
                         <ArrowRight className="w-4 h-4" />
                     </button>

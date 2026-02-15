@@ -5,7 +5,6 @@ const NETWORKS = [
     { name: 'BNB', url: 'https://bsc-dataseed1.binance.org/', ticker: 'BNB' }
 ];
 
-// JSON-RPC Payload Builder
 const createBatchPayload = (addresses: string[], idStart: number) => {
     return addresses.map((addr, i) => ({
         jsonrpc: '2.0',
@@ -15,7 +14,6 @@ const createBatchPayload = (addresses: string[], idStart: number) => {
     }));
 };
 
-// Helper: Chunk array
 const chunkArray = <T>(arr: T[], size: number): T[][] => {
     return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
         arr.slice(i * size, i * size + size)
@@ -28,37 +26,90 @@ export interface BalanceResult {
     symbol: string;
 }
 
-export const checkBalances = async (ethAddresses: string[]): Promise<BalanceResult[]> => {
-    const results: BalanceResult[] = [];
-    const chunks = chunkArray(ethAddresses, 64); // Split 128 into 2 chunks of 64
+export interface ChunkStatus {
+    network: string;
+    chunkIndex: number;
+    status: 'ok' | 'error';
+    error?: string;
+}
 
-    // We check both networks for all addresses
-    // To avoid rate limits, we process chunks sequentially with a small delay
+export interface CheckResult {
+    balances: BalanceResult[];
+    allVerified: boolean;
+    errors: string[];
+    chunkStatuses: ChunkStatus[];
+    networksVerified: string[];
+    aborted: boolean;
+}
+
+/**
+ * Check balances for a list of ETH addresses across all networks.
+ * Supports AbortSignal for cancellation (prevents false eliminations).
+ */
+export const checkBalances = async (
+    ethAddresses: string[],
+    signal?: AbortSignal
+): Promise<CheckResult> => {
+    const result: CheckResult = {
+        balances: [],
+        allVerified: false,
+        errors: [],
+        chunkStatuses: [],
+        networksVerified: [],
+        aborted: false,
+    };
+
+    const chunks = chunkArray(ethAddresses, 64);
+    let totalChunks = 0;
+    let successfulChunks = 0;
+    const verifiedNetworks = new Set<string>();
+
     for (const network of NETWORKS) {
-        for (const chunk of chunks) {
+        let networkOk = true;
+
+        for (let ci = 0; ci < chunks.length; ci++) {
+            const chunk = chunks[ci];
+            totalChunks++;
+
+            // Check if aborted before starting
+            if (signal?.aborted) {
+                result.aborted = true;
+                return result;
+            }
+
             try {
                 const payload = createBatchPayload(chunk, 1);
                 const response = await fetch(network.url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
+                    signal, // Pass AbortSignal to fetch
                 });
 
-                if (!response.ok) continue;
+                if (!response.ok) {
+                    const errMsg = `${network.name} chunk ${ci}: HTTP ${response.status}`;
+                    result.errors.push(errMsg);
+                    result.chunkStatuses.push({
+                        network: network.name,
+                        chunkIndex: ci,
+                        status: 'error',
+                        error: `HTTP ${response.status}`,
+                    });
+                    networkOk = false;
+                    continue;
+                }
 
                 const data = await response.json();
 
-                // Process responses
                 if (Array.isArray(data)) {
                     data.forEach((item: any, index: number) => {
                         const balanceHex = item.result;
                         if (balanceHex && balanceHex !== '0x0') {
                             const balanceWei = BigInt(balanceHex);
-                            // If balance > 0, meaningful amount
                             if (balanceWei > 0n) {
                                 const etherVal = Number(ethers.formatEther(balanceWei));
                                 if (etherVal > 0) {
-                                    results.push({
+                                    result.balances.push({
                                         address: chunk[index],
                                         balance: etherVal,
                                         symbol: network.ticker
@@ -68,18 +119,41 @@ export const checkBalances = async (ethAddresses: string[]): Promise<BalanceResu
                         }
                     });
                 }
-            } catch (e) {
-                console.error(`Error checking ${network.name}`, e);
+
+                result.chunkStatuses.push({
+                    network: network.name,
+                    chunkIndex: ci,
+                    status: 'ok',
+                });
+                successfulChunks++;
+
+            } catch (e: any) {
+                if (e.name === 'AbortError') {
+                    result.aborted = true;
+                    return result;
+                }
+                const errMsg = `${network.name} chunk ${ci}: ${e.message}`;
+                result.errors.push(errMsg);
+                result.chunkStatuses.push({
+                    network: network.name,
+                    chunkIndex: ci,
+                    status: 'error',
+                    error: e.message,
+                });
+                networkOk = false;
             }
-            // Small delay between chunks/networks to be safe
+
+            // Small delay between chunks
             await new Promise(r => setTimeout(r, 200));
+        }
+
+        if (networkOk) {
+            verifiedNetworks.add(network.name);
         }
     }
 
-    return results;
-};
+    result.networksVerified = Array.from(verifiedNetworks);
+    result.allVerified = successfulChunks === totalChunks && totalChunks > 0;
 
-// Keep simulateCheck for compatibility if needed (start empty)
-export const simulateCheck = async (_count: number): Promise<void> => {
-    return new Promise(resolve => setTimeout(resolve, 100));
+    return result;
 };

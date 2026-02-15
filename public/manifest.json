@@ -1,20 +1,22 @@
 {
-    "name": "Universal Key Library",
-    "short_name": "KeyLibrary",
-    "start_url": "./",
+    "name": "Universal Key Library — Универсальная Библиотека Ключей",
+    "short_name": "UKL",
+    "start_url": "/kripto-key-library/",
     "display": "standalone",
-    "background_color": "#000000",
-    "theme_color": "#00ffff",
-    "description": "Explore the vast universe of private keys. Search for Bitcoin and Ethereum lost treasures.",
+    "background_color": "#0a0a0f",
+    "theme_color": "#00ff88",
+    "lang": "ru",
+    "dir": "ltr",
+    "description": "Explore all 2^256 Bitcoin & Ethereum private keys. Real-time balance checking. / Исследуйте все 2^256 приватных ключей. Проверка балансов в реальном времени.",
+    "categories": [
+        "finance",
+        "crypto",
+        "education"
+    ],
     "icons": [
         {
             "src": "vite.svg",
-            "sizes": "192x192",
-            "type": "image/svg+xml"
-        },
-        {
-            "src": "vite.svg",
-            "sizes": "512x512",
+            "sizes": "any",
             "type": "image/svg+xml"
         }
     ]
