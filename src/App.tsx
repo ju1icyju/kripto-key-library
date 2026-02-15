@@ -4,6 +4,7 @@ import { KeyTable } from './components/KeyTable';
 import { Controls } from './components/Controls';
 import { Disclaimer } from './components/Disclaimer';
 import { Stats } from './components/Stats';
+import { TurboPanel } from './components/TurboPanel';
 import { TerminalAlert } from './components/TerminalAlert';
 import { formatBigInt } from './utils/formatters';
 import { getEliminatedCount } from './utils/supabase';
@@ -11,7 +12,7 @@ import { LangProvider, useLang } from './utils/i18n';
 
 function AppContent() {
   const [page, setPage] = useState<bigint>(1n);
-  const [view, setView] = useState<'home' | 'disclaimer' | 'stats'>('home');
+  const [view, setView] = useState<'home' | 'disclaimer' | 'stats' | 'turbo'>('home');
   const [eliminatedCount, setEliminatedCount] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -25,6 +26,8 @@ function AppContent() {
         setView('disclaimer');
       } else if (hash === '#stats') {
         setView('stats');
+      } else if (hash === '#turbo') {
+        setView('turbo');
       } else {
         setView('home');
       }
@@ -98,6 +101,8 @@ function AppContent() {
           </>
         ) : view === 'stats' ? (
           <Stats />
+        ) : view === 'turbo' ? (
+          <TurboPanel />
         ) : (
           <Disclaimer />
         )}

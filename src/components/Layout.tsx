@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from 'react';
-import { Terminal, Coffee, Info, Home, Check, Copy, Database, User, BarChart3, Globe } from 'lucide-react';
+import { Terminal, Coffee, Info, Home, Check, Copy, Database, User, BarChart3, Globe, Zap } from 'lucide-react';
 import { useLang } from '../utils/i18n';
 
 interface LayoutProps {
@@ -45,6 +45,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, eliminatedCount, sessi
                         </a>
                         <a href="#stats" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
                             <BarChart3 className="w-4 h-4" /> <span className="hidden md:inline">{t.navStats}</span>
+                        </a>
+                        <a href="#turbo" className="flex items-center gap-1 text-yellow-400 hover:text-yellow-300 transition-colors">
+                            <Zap className="w-4 h-4" /> <span className="hidden md:inline">{t.turbo}</span>
                         </a>
                         <button
                             onClick={toggleLang}

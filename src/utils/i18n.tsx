@@ -76,6 +76,27 @@ const translations = {
         // TerminalAlert
         sectorEliminated: 'СЕКТОР НАВСЕГДА УДАЛЁН ИЗ РЕЕСТРА',
 
+        // Turbo
+        turbo: '⚡ ТУРБО',
+        turboTitle: 'ТУРБО-СКАНЕР',
+        turboSubtitle: 'Массовое сканирование страниц',
+        turboPages: 'Страниц параллельно',
+        turboNetworks: 'Сети для проверки',
+        turboSpeed: 'Скорость',
+        turboSpeedNormal: 'Обычная',
+        turboSpeedFast: 'Быстрая',
+        turboSpeedTurbo: 'ТУРБО',
+        turboStart: 'ЗАПУСТИТЬ СКАНЕР',
+        turboStop: 'ОСТАНОВИТЬ',
+        turboScanned: 'Просканировано',
+        turboEliminated: 'Утилизировано',
+        turboFoundTotal: 'Найдено',
+        turboSpeed2: 'Скорость',
+        turboPagesMin: 'стр/мин',
+        turboRunning: 'Сканирование...',
+        turboIdle: 'Ожидание запуска',
+        turboCompleted: 'Завершено',
+
         // SEO
         pageTitle: 'Универсальная Библиотека Ключей — Поиск приватных ключей Bitcoin и Ethereum',
     },
@@ -151,6 +172,27 @@ const translations = {
 
         // TerminalAlert
         sectorEliminated: 'SECTOR PERMANENTLY REMOVED FROM REGISTRY',
+
+        // Turbo
+        turbo: '⚡ TURBO',
+        turboTitle: 'TURBO SCANNER',
+        turboSubtitle: 'Mass page scanning',
+        turboPages: 'Parallel pages',
+        turboNetworks: 'Networks to check',
+        turboSpeed: 'Speed',
+        turboSpeedNormal: 'Normal',
+        turboSpeedFast: 'Fast',
+        turboSpeedTurbo: 'TURBO',
+        turboStart: 'START SCANNER',
+        turboStop: 'STOP',
+        turboScanned: 'Scanned',
+        turboEliminated: 'Eliminated',
+        turboFoundTotal: 'Found',
+        turboSpeed2: 'Speed',
+        turboPagesMin: 'pg/min',
+        turboRunning: 'Scanning...',
+        turboIdle: 'Waiting to start',
+        turboCompleted: 'Completed',
 
         // SEO
         pageTitle: 'Universal Key Library — Search Bitcoin & Ethereum Private Keys',

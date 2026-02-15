@@ -1,0 +1,26 @@
+{
+    "name": "ukl-telegram-bot",
+    "version": "1.0.0",
+    "description": "Telegram bot for Universal Key Library — scan random pages and check crypto balances",
+    "type": "module",
+    "scripts": {
+        "start": "tsx src/index.ts",
+        "dev": "tsx watch src/index.ts"
+    },
+    "dependencies": {
+        "node-telegram-bot-api": "^0.66.0",
+        "ethers": "^6.13.4",
+        "@noble/secp256k1": "^2.1.0",
+        "tiny-secp256k1": "^2.2.3",
+        "ecpair": "^3.0.0",
+        "bitcoinjs-lib": "^7.0.0-rc.0",
+        "@supabase/supabase-js": "^2.47.12",
+        "dotenv": "^16.4.7"
+    },
+    "devDependencies": {
+        "@types/node-telegram-bot-api": "^0.64.7",
+        "@types/node": "^22.0.0",
+        "tsx": "^4.19.2",
+        "typescript": "^5.7.3"
+    }
+}

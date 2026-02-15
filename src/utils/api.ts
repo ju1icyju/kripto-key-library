@@ -42,14 +42,27 @@ export interface CheckResult {
     aborted: boolean;
 }
 
+export type SpeedMode = 'normal' | 'fast' | 'turbo';
+
+const SPEED_DELAYS: Record<SpeedMode, number> = {
+    normal: 200,
+    fast: 80,
+    turbo: 30,
+};
+
 /**
- * Check balances for a list of ETH addresses across all networks.
+ * Check balances for a list of ETH addresses across selected networks.
  * Supports AbortSignal for cancellation (prevents false eliminations).
  */
 export const checkBalances = async (
     ethAddresses: string[],
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    options?: { speed?: SpeedMode; networks?: string[] }
 ): Promise<CheckResult> => {
+    const speed = options?.speed ?? 'normal';
+    const enabledNetworks = options?.networks;
+    const delay = SPEED_DELAYS[speed];
+
     const result: CheckResult = {
         balances: [],
         allVerified: false,
@@ -59,19 +72,22 @@ export const checkBalances = async (
         aborted: false,
     };
 
+    const activeNetworks = enabledNetworks
+        ? NETWORKS.filter(n => enabledNetworks.includes(n.name))
+        : NETWORKS;
+
     const chunks = chunkArray(ethAddresses, 64);
     let totalChunks = 0;
     let successfulChunks = 0;
     const verifiedNetworks = new Set<string>();
 
-    for (const network of NETWORKS) {
+    for (const network of activeNetworks) {
         let networkOk = true;
 
         for (let ci = 0; ci < chunks.length; ci++) {
             const chunk = chunks[ci];
             totalChunks++;
 
-            // Check if aborted before starting
             if (signal?.aborted) {
                 result.aborted = true;
                 return result;
@@ -83,7 +99,7 @@ export const checkBalances = async (
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload),
-                    signal, // Pass AbortSignal to fetch
+                    signal,
                 });
 
                 if (!response.ok) {
@@ -143,8 +159,7 @@ export const checkBalances = async (
                 networkOk = false;
             }
 
-            // Small delay between chunks
-            await new Promise(r => setTimeout(r, 200));
+            await new Promise(r => setTimeout(r, delay));
         }
 
         if (networkOk) {
@@ -157,3 +172,6 @@ export const checkBalances = async (
 
     return result;
 };
+
+/** Available network names for turbo config */
+export const AVAILABLE_NETWORKS = NETWORKS.map(n => n.name);
