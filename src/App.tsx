@@ -35,7 +35,21 @@ function AppContent() {
 
     window.addEventListener('hashchange', handleHash);
     handleHash();
-    return () => window.removeEventListener('hashchange', handleHash);
+
+    // Listen for turbo-navigate events from TurboPanel
+    const handleTurboNavigate = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.page) {
+        setPage(BigInt(detail.page));
+        setView('home');
+      }
+    };
+    window.addEventListener('turbo-navigate', handleTurboNavigate);
+
+    return () => {
+      window.removeEventListener('hashchange', handleHash);
+      window.removeEventListener('turbo-navigate', handleTurboNavigate);
+    };
   }, []);
 
   // Load global eliminated count

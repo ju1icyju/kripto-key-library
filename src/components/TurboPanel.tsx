@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Zap, Play, Square, Activity, Gauge, Trash2, DollarSign, Settings2 } from 'lucide-react';
+import { Zap, Play, Square, Activity, Gauge, Trash2, DollarSign, Settings2, ExternalLink, AlertTriangle } from 'lucide-react';
 import { useLang } from '../utils/i18n';
 import { generateWallet, MAX_PAGE, ROWS_PER_PAGE } from '../utils/crypto';
 import { checkBalances, AVAILABLE_NETWORKS, type SpeedMode, type BalanceResult } from '../utils/api';
@@ -26,6 +26,7 @@ export const TurboPanel: React.FC = () => {
     const [eliminatedCount, setEliminatedCount] = useState(0);
     const [totalFoundUsd, setTotalFoundUsd] = useState(0);
     const [results, setResults] = useState<TurboResult[]>([]);
+    const [foundAlerts, setFoundAlerts] = useState<TurboResult[]>([]);
     const [startTime, setStartTime] = useState<number | null>(null);
     const [pagesPerMin, setPagesPerMin] = useState(0);
 
@@ -38,7 +39,7 @@ export const TurboPanel: React.FC = () => {
             setPagesPerMin(0);
             return;
         }
-        const elapsed = (Date.now() - startTime) / 60000; // minutes
+        const elapsed = (Date.now() - startTime) / 60000;
         if (elapsed > 0) {
             setPagesPerMin(Math.round(scannedCount / elapsed));
         }
@@ -52,10 +53,18 @@ export const TurboPanel: React.FC = () => {
         return ((rand % MAX_PAGE) + 1n).toString();
     };
 
+    const navigateToPage = (page: string) => {
+        // Store the target page and navigate to home view
+        window.location.hash = '';
+        // Use a custom event to communicate the page number to App
+        setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('turbo-navigate', { detail: { page } }));
+        }, 100);
+    };
+
     const scanPage = useCallback(async (page: string, signal: AbortSignal): Promise<TurboResult | null> => {
         if (signal.aborted) return null;
 
-        // Generate addresses
         const ethAddresses: string[] = [];
         for (let i = 0; i < Number(ROWS_PER_PAGE); i++) {
             try {
@@ -73,7 +82,6 @@ export const TurboPanel: React.FC = () => {
             if (result.balances.length > 0) {
                 return { page, status: 'found', balances: result.balances, timestamp: Date.now() };
             } else if (result.allVerified) {
-                // Record elimination
                 recordEliminated(page, result.networksVerified);
                 return { page, status: 'verified', balances: [], timestamp: Date.now() };
             } else {
@@ -92,10 +100,7 @@ export const TurboPanel: React.FC = () => {
         setStartTime(Date.now());
 
         while (runningRef.current && !controller.signal.aborted) {
-            // Launch parallel batch
             const pages = Array.from({ length: parallelPages }, () => generateRandomPage());
-
-            // Fire-and-forget increment for each page
             pages.forEach(() => incrementRandomClicks());
 
             const promises = pages.map(p => scanPage(p, controller.signal));
@@ -106,13 +111,28 @@ export const TurboPanel: React.FC = () => {
             for (const r of batchResults) {
                 if (!r) continue;
                 setScannedCount(prev => prev + 1);
-                setResults(prev => [r, ...prev].slice(0, 50)); // Keep last 50
+                setResults(prev => [r, ...prev].slice(0, 50));
 
                 if (r.status === 'verified') {
                     setEliminatedCount(prev => prev + 1);
                 } else if (r.status === 'found') {
                     const total = r.balances.reduce((s, b) => s + b.balance, 0);
                     setTotalFoundUsd(prev => prev + total);
+                    // Save to found alerts (persisted separately, never trimmed)
+                    setFoundAlerts(prev => [r, ...prev]);
+                    // Save to localStorage for persistence across sessions
+                    const saved = JSON.parse(localStorage.getItem('ukl_turbo_found') || '[]');
+                    saved.unshift({
+                        page: r.page,
+                        balances: r.balances,
+                        timestamp: r.timestamp,
+                    });
+                    localStorage.setItem('ukl_turbo_found', JSON.stringify(saved));
+                    // Auto-stop on find — don't miss it!
+                    runningRef.current = false;
+                    controller.abort();
+                    setRunning(false);
+                    return;
                 }
             }
         }
@@ -138,6 +158,24 @@ export const TurboPanel: React.FC = () => {
         { value: 'turbo', label: t.turboSpeedTurbo },
     ];
 
+    // Load saved found alerts on mount
+    useEffect(() => {
+        try {
+            const saved = JSON.parse(localStorage.getItem('ukl_turbo_found') || '[]');
+            if (saved.length > 0) {
+                setFoundAlerts(saved.map((s: any) => ({
+                    page: s.page,
+                    status: 'found' as const,
+                    balances: s.balances,
+                    timestamp: s.timestamp,
+                })));
+            }
+        } catch { /* ignore */ }
+    }, []);
+
+    const truncatePage = (p: string) =>
+        p.length > 24 ? p.slice(0, 10) + '…' + p.slice(-10) : p;
+
     return (
         <div className="max-w-4xl mx-auto animate-in fade-in duration-500">
             {/* Header */}
@@ -150,6 +188,43 @@ export const TurboPanel: React.FC = () => {
                     <p className="text-gray-500 text-xs uppercase tracking-widest">{t.turboSubtitle}</p>
                 </div>
             </div>
+
+            {/* ⚠️ FOUND ALERTS — persistent, prominent */}
+            {foundAlerts.length > 0 && (
+                <div className="mb-6 space-y-3">
+                    {foundAlerts.map((alert, i) => (
+                        <div key={`found-${alert.page}-${alert.timestamp}-${i}`}
+                            className="border-2 border-terminal-warning bg-terminal-warning/10 rounded-lg p-4 animate-pulse">
+                            <div className="flex items-center gap-2 mb-3">
+                                <AlertTriangle className="w-5 h-5 text-terminal-warning" />
+                                <span className="text-terminal-warning font-bold uppercase tracking-widest text-sm">
+                                    ⚠ {t.fundsFound}
+                                </span>
+                            </div>
+                            <div className="space-y-2">
+                                {alert.balances.map((b, bi) => (
+                                    <div key={bi} className="flex items-center justify-between text-sm font-mono">
+                                        <span className="text-gray-400 truncate max-w-[60%]">{b.address}</span>
+                                        <span className="text-terminal-warning font-bold">{b.balance.toFixed(6)} {b.symbol}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="mt-3 pt-3 border-t border-terminal-warning/30 flex items-center justify-between">
+                                <span className="text-gray-500 text-xs font-mono">
+                                    #{truncatePage(alert.page)}
+                                </span>
+                                <button
+                                    onClick={() => navigateToPage(alert.page)}
+                                    className="flex items-center gap-2 px-3 py-1.5 bg-terminal-warning/20 hover:bg-terminal-warning/40 text-terminal-warning rounded border border-terminal-warning/50 text-xs font-bold uppercase tracking-wider transition-all"
+                                >
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                    OPEN PAGE
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {/* Config Panel */}
             {!running && (
@@ -276,18 +351,30 @@ export const TurboPanel: React.FC = () => {
                 <div className="glass-panel border border-white/10 rounded-lg overflow-hidden">
                     <div className="max-h-80 overflow-y-auto divide-y divide-white/5">
                         {results.map((r, i) => (
-                            <div key={`${r.page}-${r.timestamp}-${i}`} className={`flex items-center justify-between px-4 py-2 text-xs font-mono ${r.status === 'found' ? 'bg-terminal-warning/10' :
-                                    r.status === 'verified' ? 'bg-green-500/5' :
-                                        'bg-red-500/5'
-                                }`}>
-                                <span className="text-gray-500 truncate max-w-[200px]">
-                                    #{r.page.length > 20 ? r.page.slice(0, 8) + '…' + r.page.slice(-8) : r.page}
-                                </span>
+                            <div key={`${r.page}-${r.timestamp}-${i}`}
+                                className={`flex items-center justify-between px-4 py-2 text-xs font-mono ${r.status === 'found' ? 'bg-terminal-warning/10' :
+                                        r.status === 'verified' ? 'bg-green-500/5' :
+                                            'bg-red-500/5'
+                                    }`}
+                            >
+                                {r.status === 'found' ? (
+                                    <button
+                                        onClick={() => navigateToPage(r.page)}
+                                        className="text-terminal-warning hover:underline flex items-center gap-1"
+                                    >
+                                        <ExternalLink className="w-3 h-3" />
+                                        #{truncatePage(r.page)}
+                                    </button>
+                                ) : (
+                                    <span className="text-gray-500 truncate max-w-[200px]">
+                                        #{truncatePage(r.page)}
+                                    </span>
+                                )}
                                 <span className={`font-bold ${r.status === 'found' ? 'text-terminal-warning animate-pulse' :
                                         r.status === 'verified' ? 'text-green-500' :
                                             'text-red-500'
                                     }`}>
-                                    {r.status === 'found' ? `$${r.balances.reduce((s, b) => s + b.balance, 0).toFixed(4)}` :
+                                    {r.status === 'found' ? `💰 $${r.balances.reduce((s, b) => s + b.balance, 0).toFixed(4)}` :
                                         r.status === 'verified' ? '✓ 0.00' : '✗ ERR'}
                                 </span>
                             </div>
