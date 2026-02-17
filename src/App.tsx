@@ -10,13 +10,16 @@ import { Achievements } from './components/Achievements';
 import { DailyChallenge } from './components/DailyChallenge';
 import { CryptoGuide } from './components/CryptoGuide';
 import { ProbabilityCalc } from './components/ProbabilityCalc';
+import { KeyDecoder } from './components/KeyDecoder';
+import { Museum } from './components/Museum';
+import { WhaleGallery } from './components/WhaleGallery';
 import { TerminalAlert } from './components/TerminalAlert';
 import { formatBigInt } from './utils/formatters';
 import { getEliminatedCount } from './utils/supabase';
 import { LangProvider, useLang } from './utils/i18n';
 import { trackElimination, trackRandomClick, trackPageVisited, trackStatsVisited } from './utils/achievements';
 
-type ViewType = 'home' | 'disclaimer' | 'stats' | 'turbo' | 'leaderboard' | 'achievements' | 'daily' | 'learn' | 'calc';
+type ViewType = 'home' | 'disclaimer' | 'stats' | 'turbo' | 'leaderboard' | 'achievements' | 'daily' | 'learn' | 'calc' | 'decode' | 'museum' | 'whales';
 
 function AppContent() {
   const [page, setPage] = useState<bigint>(1n);
@@ -39,6 +42,9 @@ function AppContent() {
         '#daily': 'daily',
         '#learn': 'learn',
         '#calc': 'calc',
+        '#decode': 'decode',
+        '#museum': 'museum',
+        '#whales': 'whales',
       };
       setView(routes[hash] || 'home');
 
@@ -59,9 +65,21 @@ function AppContent() {
     };
     window.addEventListener('turbo-navigate', handleTurboNavigate);
 
+    // Listen for navigate-page events from KeyDecoder
+    const handleNavigatePage = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.page) {
+        setPage(BigInt(detail.page));
+        setView('home');
+        window.location.hash = '';
+      }
+    };
+    window.addEventListener('navigate-page', handleNavigatePage);
+
     return () => {
       window.removeEventListener('hashchange', handleHash);
       window.removeEventListener('turbo-navigate', handleTurboNavigate);
+      window.removeEventListener('navigate-page', handleNavigatePage);
     };
   }, []);
 
@@ -123,6 +141,9 @@ function AppContent() {
       case 'daily': return <DailyChallenge />;
       case 'learn': return <CryptoGuide />;
       case 'calc': return <ProbabilityCalc />;
+      case 'decode': return <KeyDecoder />;
+      case 'museum': return <Museum />;
+      case 'whales': return <WhaleGallery />;
       case 'disclaimer': return <Disclaimer />;
       case 'home':
       default:

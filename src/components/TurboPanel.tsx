@@ -3,7 +3,7 @@ import { Zap, Play, Square, Activity, Gauge, Trash2, DollarSign, Settings2, Exte
 import { useLang } from '../utils/i18n';
 import { generateWallet, MAX_PAGE, ROWS_PER_PAGE } from '../utils/crypto';
 import { checkBalances, AVAILABLE_NETWORKS, type SpeedMode, type BalanceResult } from '../utils/api';
-import { recordEliminated, incrementRandomClicks } from '../utils/supabase';
+import { recordEliminated, incrementRandomClicks, recordFoundWallet } from '../utils/supabase';
 import { trackElimination, trackTurboUsed } from '../utils/achievements';
 
 interface TurboResult {
@@ -121,6 +121,10 @@ export const TurboPanel: React.FC = () => {
                 } else if (r.status === 'found') {
                     const total = r.balances.reduce((s, b) => s + b.balance, 0);
                     setTotalFoundUsd(prev => prev + total);
+                    // Record each find to museum (Supabase)
+                    for (const b of r.balances) {
+                        recordFoundWallet(r.page, b.address, b.balance, b.symbol);
+                    }
                     // Save to found alerts (persisted separately, never trimmed)
                     setFoundAlerts(prev => [r, ...prev]);
                     // Save to localStorage for persistence across sessions

@@ -110,4 +110,28 @@ REVOKE INSERT, UPDATE, DELETE ON global_stats FROM anon;
 SELECT tablename, rowsecurity 
 FROM pg_tables 
 WHERE schemaname = 'public' 
-AND tablename IN ('eliminated_pages', 'global_stats');
+AND tablename IN ('eliminated_pages', 'global_stats', 'found_wallets');
+
+-- ============================================================
+-- 7. Museum: found_wallets table
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS found_wallets (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    page_number TEXT NOT NULL,
+    address TEXT NOT NULL,
+    balance NUMERIC NOT NULL CHECK (balance > 0),
+    symbol TEXT NOT NULL DEFAULT 'ETH',
+    found_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE found_wallets ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Anyone can read found wallets" ON found_wallets;
+DROP POLICY IF EXISTS "Anyone can insert found wallets" ON found_wallets;
+
+CREATE POLICY "Anyone can read found wallets"
+    ON found_wallets FOR SELECT USING (true);
+
+CREATE POLICY "Anyone can insert found wallets"
+    ON found_wallets FOR INSERT WITH CHECK (true);

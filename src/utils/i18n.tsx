@@ -179,6 +179,40 @@ const translations = {
 
         // SEO
         pageTitle: 'Универсальная Библиотека Ключей — Поиск приватных ключей Bitcoin и Ethereum',
+
+        // Key Decoder
+        decoderTitle: 'ДЕКОДЕР КЛЮЧА',
+        decoderSubtitle: 'Найди страницу по приватному ключу',
+        decoderInputLabel: 'Приватный ключ (hex)',
+        decoderSearch: 'НАЙТИ',
+        decoderHint: 'Введите hex-строку (с 0x или без). Пример: 0x1, 0xff, abc123...',
+        decoderErrorFormat: 'Неверный формат. Введите hex-строку до 64 символов.',
+        decoderErrorRange: 'Ключ вне диапазона (1 — 2²⁵⁶).',
+        decoderPage: 'Страница',
+        decoderRow: 'Строка',
+        decoderPrivKey: 'Приватный ключ',
+        decoderEth: 'ETH/BNB адрес',
+        decoderBtc: 'BTC адрес',
+        decoderGoToPage: 'Перейти на эту страницу',
+
+        // Museum
+        museumTitle: 'МУЗЕЙ НАХОДОК',
+        museumSubtitle: 'Все когда-либо найденные балансы',
+        museumDesc: 'Здесь отображаются реальные находки со всех пользователей сайта. Каждая находка — адрес с ненулевым балансом, обнаруженный при сканировании.',
+        museumDate: 'Дата',
+        museumPage: 'Страница',
+        museumAddress: 'Адрес',
+        museumAmount: 'Сумма',
+        museumEmpty: 'Пока ничего не найдено',
+        museumEmptyHint: 'Учитывая 2²⁵⁶ возможных ключей, это ожидаемо. Продолжайте сканировать — и однажды эта витрина заполнится!',
+        museumRefresh: 'Обновить',
+
+        // Whale Gallery
+        whalesTitle: 'ГАЛЕРЕЯ КИТОВ',
+        whalesSubtitle: 'Легендарные адреса криптомира',
+        whalesDesc: 'Самые известные и крупнейшие кошельки Bitcoin и Ethereum. Каждый из этих адресов хранится где-то в бесконечных страницах библиотеки ключей — но найти его номер невозможно без приватного ключа.',
+        whalesApprox: '≈ баланс',
+        whalesPageNote: 'Этот адрес существует на одной из ~9×10⁷⁴ страниц библиотеки. Обратное вычисление страницы по адресу — вычислительно невозможно (это и есть криптография!).',
     },
     en: {
         // Layout
@@ -356,6 +390,40 @@ const translations = {
 
         // SEO
         pageTitle: 'Universal Key Library — Search Bitcoin & Ethereum Private Keys',
+
+        // Key Decoder
+        decoderTitle: 'KEY DECODER',
+        decoderSubtitle: 'Find a page by private key',
+        decoderInputLabel: 'Private key (hex)',
+        decoderSearch: 'FIND',
+        decoderHint: 'Enter hex string (with 0x or without). Example: 0x1, 0xff, abc123...',
+        decoderErrorFormat: 'Invalid format. Enter a hex string up to 64 characters.',
+        decoderErrorRange: 'Key out of range (1 — 2²⁵⁶).',
+        decoderPage: 'Page',
+        decoderRow: 'Row',
+        decoderPrivKey: 'Private key',
+        decoderEth: 'ETH/BNB address',
+        decoderBtc: 'BTC address',
+        decoderGoToPage: 'Go to this page',
+
+        // Museum
+        museumTitle: 'MUSEUM OF FINDS',
+        museumSubtitle: 'All balances ever discovered',
+        museumDesc: 'This page shows real finds from all site users. Each entry is an address with a non-zero balance discovered during scanning.',
+        museumDate: 'Date',
+        museumPage: 'Page',
+        museumAddress: 'Address',
+        museumAmount: 'Amount',
+        museumEmpty: 'Nothing found yet',
+        museumEmptyHint: 'Given 2²⁵⁶ possible keys, this is expected. Keep scanning — and one day this showcase will fill up!',
+        museumRefresh: 'Refresh',
+
+        // Whale Gallery
+        whalesTitle: 'WHALE GALLERY',
+        whalesSubtitle: 'Legendary crypto addresses',
+        whalesDesc: 'The most famous and largest Bitcoin and Ethereum wallets. Each of these addresses exists somewhere in the infinite pages of the key library — but finding its page number is impossible without the private key.',
+        whalesApprox: '≈ balance',
+        whalesPageNote: 'This address lives on one of ~9×10⁷⁴ library pages. Reverse-computing the page from an address is computationally impossible (that\'s cryptography!).',
     },
 };
 

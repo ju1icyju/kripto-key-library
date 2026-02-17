@@ -4,7 +4,7 @@ import { shortenAddress } from '../utils/formatters';
 import { ExternalLink, Layers, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { ScanEffect } from './ScanEffect';
 import { checkBalances, type CheckResult, type BalanceResult } from '../utils/api';
-import { recordEliminated } from '../utils/supabase';
+import { recordEliminated, recordFoundWallet } from '../utils/supabase';
 import { useLang } from '../utils/i18n';
 
 interface KeyTableProps {
@@ -65,6 +65,10 @@ export const KeyTable: React.FC<KeyTableProps> = ({ pageNumber, onEliminated }) 
                     setIsFound(true);
                     setFoundItems(result.balances);
                     setVerificationStatus('found');
+                    // Record each find to museum
+                    for (const b of result.balances) {
+                        recordFoundWallet(pageNumber, b.address, b.balance, b.symbol);
+                    }
                 } else if (result.allVerified) {
                     setTotalFound("0.00");
                     setIsFound(false);
@@ -159,9 +163,9 @@ export const KeyTable: React.FC<KeyTableProps> = ({ pageNumber, onEliminated }) 
     return (
         <div className="flex flex-col gap-4">
             <div className={`flex flex-col md:flex-row justify-between items-start md:items-center gap-2 bg-terminal-dim/30 border p-3 rounded glass-panel transition-colors duration-500 ${verificationStatus === 'found' ? 'border-terminal-warning bg-terminal-warning/10' :
-                    verificationStatus === 'verified' ? 'border-green-500/30 bg-green-500/5' :
-                        verificationStatus === 'error' ? 'border-red-500/30 bg-red-500/5' :
-                            'border-white/10'
+                verificationStatus === 'verified' ? 'border-green-500/30 bg-green-500/5' :
+                    verificationStatus === 'error' ? 'border-red-500/30 bg-red-500/5' :
+                        'border-white/10'
                 }`}>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2 text-sm text-gray-400">

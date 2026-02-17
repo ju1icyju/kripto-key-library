@@ -181,6 +181,32 @@ export const recordFoundUsd = async (amount: number): Promise<void> => {
 };
 
 /**
+ * Record an individual found wallet (for the Museum).
+ */
+export const recordFoundWallet = async (
+    pageNumber: string,
+    address: string,
+    balance: number,
+    symbol: string
+): Promise<void> => {
+    if (!isValidPageNumber(pageNumber)) return;
+    if (!address || address.length > 100) return;
+    if (balance <= 0 || !isFinite(balance)) return;
+    if (!rateLimit('found_wallet', 5000)) return;
+
+    try {
+        await supabase.from('found_wallets').insert({
+            page_number: pageNumber,
+            address,
+            balance,
+            symbol: symbol.slice(0, 10),
+        });
+    } catch {
+        // table might not exist yet — silent fail
+    }
+};
+
+/**
  * Get all global stats in one call.
  */
 export const getGlobalStats = async (): Promise<GlobalStats> => {
