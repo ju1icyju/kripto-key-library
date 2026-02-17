@@ -6,8 +6,24 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /**
- * Record a page as eliminated (verified empty on all networks).
+ * Persistent user identity + nickname
  */
+const generateUUID = (): string => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+};
+
+export const getUserId = (): string => {
+    let id = localStorage.getItem('ukl_user_id');
+    if (!id) {
+        id = generateUUID();
+        localStorage.setItem('ukl_user_id', id);
+    }
+    return id;
+};
+
 export const getNickname = (): string => {
     return localStorage.getItem('ukl_nickname') || 'Anon';
 };
@@ -24,6 +40,7 @@ export const recordEliminated = async (pageNumber: string, networksVerified: str
                 page_number: pageNumber,
                 networks_verified: networksVerified,
                 nickname: getNickname(),
+                user_id: getUserId(),
             }, { onConflict: 'page_number' });
 
         if (error) {
@@ -128,28 +145,34 @@ export const getGlobalStats = async (): Promise<GlobalStats> => {
 
 export interface LeaderboardEntry {
     nickname: string;
+    user_id: string;
     score: number;
-    last_active: string;
 }
 
 export const getLeaderboard = async (): Promise<LeaderboardEntry[]> => {
     try {
-        // Query eliminated_pages grouped by nickname
         const { data, error } = await supabase
             .from('eliminated_pages')
-            .select('nickname');
+            .select('nickname, user_id');
 
         if (error || !data) return [];
 
-        // Aggregate client-side (Supabase free tier doesn't support server-side grouping easily)
-        const counts: Record<string, number> = {};
+        // Group by user_id, take latest nickname per user
+        const users: Record<string, { nickname: string; score: number }> = {};
         for (const row of data) {
-            const name = row.nickname || 'Anon';
-            counts[name] = (counts[name] || 0) + 1;
+            const uid = row.user_id || 'unknown';
+            if (!users[uid]) {
+                users[uid] = { nickname: row.nickname || 'Anon', score: 0 };
+            }
+            users[uid].score++;
+            // Always update to latest nickname (last seen)
+            if (row.nickname && row.nickname !== 'Anon') {
+                users[uid].nickname = row.nickname;
+            }
         }
 
-        return Object.entries(counts)
-            .map(([nickname, score]) => ({ nickname, score, last_active: '' }))
+        return Object.entries(users)
+            .map(([user_id, data]) => ({ user_id, nickname: data.nickname, score: data.score }))
             .sort((a, b) => b.score - a.score)
             .slice(0, 50);
     } catch {
@@ -157,19 +180,16 @@ export const getLeaderboard = async (): Promise<LeaderboardEntry[]> => {
     }
 };
 
-// ─── Daily Challenge ──────────────────────────────────────
+// ─── Daily Lucky Page (personal per user) ────────────────────
 
-export const getDailyChallengePage = async (): Promise<string> => {
-    // Deterministic page from date: SHA-256("UKL-DAILY-2026-02-17")
+export const getDailyLuckyPage = async (): Promise<string> => {
+    // Personal page: SHA-256(date + user_id)
     const today = new Date().toISOString().slice(0, 10);
-    const data = new TextEncoder().encode(`UKL-DAILY-${today}`);
-    const hash = await crypto.subtle.digest('SHA-256', data);
+    const userId = getUserId();
+    const input = new TextEncoder().encode(`UKL-LUCKY-${today}-${userId}`);
+    const hash = await crypto.subtle.digest('SHA-256', input);
     const hex = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
     const bigNum = BigInt('0x' + hex);
     const MAX_PAGE = (2n ** 256n) / 128n;
     return ((bigNum % MAX_PAGE) + 1n).toString();
-};
-
-export const isDailyChallengeCompleted = async (page: string): Promise<boolean> => {
-    return await isPageEliminated(page);
 };

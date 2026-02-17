@@ -138,14 +138,15 @@ const translations = {
         achBotFriend: 'Друг ботов',
         achBotFriendDesc: 'Используй Telegram-бота',
 
-        // Daily Challenge
-        dailyTitle: 'ДЕЙЛИ-ЧЕЛЛЕНДЖ',
-        dailySubtitle: 'Утилизируй целевую страницу дня',
-        dailyTarget: 'Целевая страница:',
-        dailyGoTo: 'ПЕРЕЙТИ К ЦЕЛИ',
-        dailyCompleted: '✅ Сегодняшний челлендж выполнен!',
-        dailyNotCompleted: '⏳ Ещё не утилизирована',
-        dailyNextIn: 'Следующий челлендж через:',
+        // Daily Lucky Page
+        dailyTitle: 'ИСПЫТАЙ УДАЧУ',
+        dailySubtitle: 'Твоя личная счастливая страница дня',
+        dailyTarget: 'Твоя страница сегодня:',
+        dailyGoTo: 'ОТКРЫТЬ СТРАНИЦУ',
+        dailyReveal: 'УЗНАТЬ СВОЮ СТРАНИЦУ',
+        dailyNextIn: 'Новая страница через:',
+        dailyPersonal: '🎲 Эта страница сгенерирована специально для тебя',
+        dailyPersonalDesc: 'Каждый день у каждого пользователя своя уникальная страница. Может, именно сегодня тебе повезёт?',
 
         // Education
         navLearn: 'ОБУЧЕНИЕ',
@@ -314,14 +315,15 @@ const translations = {
         achBotFriend: 'Bot Friend',
         achBotFriendDesc: 'Use the Telegram bot',
 
-        // Daily Challenge
-        dailyTitle: 'DAILY CHALLENGE',
-        dailySubtitle: 'Eliminate today\'s target page',
-        dailyTarget: 'Target page:',
-        dailyGoTo: 'GO TO TARGET',
-        dailyCompleted: '✅ Today\'s challenge completed!',
-        dailyNotCompleted: '⏳ Not yet eliminated',
-        dailyNextIn: 'Next challenge in:',
+        // Daily Lucky Page
+        dailyTitle: 'TRY YOUR LUCK',
+        dailySubtitle: 'Your personal lucky page of the day',
+        dailyTarget: 'Your page today:',
+        dailyGoTo: 'OPEN PAGE',
+        dailyReveal: 'REVEAL MY PAGE',
+        dailyNextIn: 'New page in:',
+        dailyPersonal: '🎲 This page was generated just for you',
+        dailyPersonalDesc: 'Every day each user gets their own unique page. Maybe today is your lucky day?',
 
         // Education
         navLearn: 'LEARN',

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Trophy, User, RefreshCw, Edit3 } from 'lucide-react';
 import { useLang } from '../utils/i18n';
-import { getLeaderboard, getNickname, setNickname, type LeaderboardEntry } from '../utils/supabase';
+import { getLeaderboard, getNickname, setNickname, getUserId, type LeaderboardEntry } from '../utils/supabase';
 
 export const Leaderboard: React.FC = () => {
     const { t } = useLang();
@@ -85,12 +85,12 @@ export const Leaderboard: React.FC = () => {
                 ) : (
                     <div className="divide-y divide-white/5 max-h-[500px] overflow-y-auto">
                         {entries.map((entry, i) => {
-                            const isYou = entry.nickname === nick;
+                            const isYou = entry.user_id === getUserId();
                             return (
                                 <div
                                     key={entry.nickname}
                                     className={`grid grid-cols-12 items-center p-3 text-sm font-mono transition-colors ${isYou ? 'bg-terminal-accent/10 border-l-2 border-terminal-accent' :
-                                            i < 3 ? 'bg-yellow-400/5' : ''
+                                        i < 3 ? 'bg-yellow-400/5' : ''
                                         }`}
                                 >
                                     <div className="col-span-2 text-center">
@@ -104,9 +104,9 @@ export const Leaderboard: React.FC = () => {
                                         {entry.nickname} {isYou && <span className="text-xs text-terminal-accent/60">{t.leaderboardYou}</span>}
                                     </div>
                                     <div className={`col-span-3 text-right font-bold ${i === 0 ? 'text-yellow-400' :
-                                            i === 1 ? 'text-gray-300' :
-                                                i === 2 ? 'text-amber-600' :
-                                                    'text-gray-500'
+                                        i === 1 ? 'text-gray-300' :
+                                            i === 2 ? 'text-amber-600' :
+                                                'text-gray-500'
                                         }`}>
                                         {entry.score.toLocaleString()}
                                     </div>
