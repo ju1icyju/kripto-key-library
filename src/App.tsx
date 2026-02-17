@@ -14,13 +14,14 @@ import { KeyDecoder } from './components/KeyDecoder';
 import { Museum } from './components/Museum';
 import { WhaleGallery } from './components/WhaleGallery';
 import { MultiChecker } from './components/MultiChecker';
+import { Converter } from './components/Converter';
 import { TerminalAlert } from './components/TerminalAlert';
 import { formatBigInt } from './utils/formatters';
 import { getEliminatedCount } from './utils/supabase';
 import { LangProvider, useLang } from './utils/i18n';
 import { trackElimination, trackRandomClick, trackPageVisited, trackStatsVisited } from './utils/achievements';
 
-type ViewType = 'home' | 'disclaimer' | 'stats' | 'turbo' | 'leaderboard' | 'achievements' | 'daily' | 'learn' | 'calc' | 'decode' | 'museum' | 'whales' | 'checker';
+type ViewType = 'home' | 'disclaimer' | 'stats' | 'turbo' | 'leaderboard' | 'achievements' | 'daily' | 'learn' | 'calc' | 'decode' | 'museum' | 'whales' | 'checker' | 'converter';
 
 function AppContent() {
   const [page, setPage] = useState<bigint>(1n);
@@ -47,6 +48,7 @@ function AppContent() {
         '#museum': 'museum',
         '#whales': 'whales',
         '#checker': 'checker',
+        '#converter': 'converter',
       };
       setView(routes[hash] || 'home');
 
@@ -147,6 +149,7 @@ function AppContent() {
       case 'museum': return <Museum />;
       case 'whales': return <WhaleGallery />;
       case 'checker': return <MultiChecker />;
+      case 'converter': return <Converter />;
       case 'disclaimer': return <Disclaimer />;
       case 'home':
       default:

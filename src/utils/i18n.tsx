@@ -229,6 +229,10 @@ const translations = {
         checkerCta: 'Хотите исследовать все 2²⁵⁶ возможных приватных ключей?',
         checkerCtaExplore: 'БИБЛИОТЕКА КЛЮЧЕЙ',
         checkerCtaTurbo: 'ТУРБО-СКАНЕР',
+
+        // Converter
+        converterTitle: 'КОНВЕРТЕР ЕДИНИЦ',
+        converterSubtitle: 'Wei • Gwei • ETH • Satoshi • BTC',
     },
     en: {
         // Layout
@@ -456,6 +460,10 @@ const translations = {
         checkerCta: 'Want to explore all 2²⁵⁶ possible private keys?',
         checkerCtaExplore: 'KEY LIBRARY',
         checkerCtaTurbo: 'TURBO SCANNER',
+
+        // Converter
+        converterTitle: 'UNIT CONVERTER',
+        converterSubtitle: 'Wei • Gwei • ETH • Satoshi • BTC',
     },
 };
 

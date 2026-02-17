@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from 'react';
-import { Terminal, Coffee, Info, Home, Check, Copy, Database, User, BarChart3, Globe, Zap, Trophy, BookOpen, Award, Calendar, Search, Landmark, Fish, Wallet } from 'lucide-react';
+import { Terminal, Coffee, Info, Home, Check, Copy, Database, User, BarChart3, Globe, Zap, Trophy, BookOpen, Award, Calendar, Search, Landmark, Fish, Wallet, ArrowRightLeft } from 'lucide-react';
 import { useLang } from '../utils/i18n';
 import { trackLanguageSwitch } from '../utils/achievements';
 
@@ -56,6 +56,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, eliminatedCount, sessi
                         </a>
                         <a href="#learn" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
                             <BookOpen className="w-4 h-4" /> <span className="hidden lg:inline">{t.navLearn}</span>
+                        </a>
+                        <a href="#converter" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors" title="Unit Converter">
+                            <ArrowRightLeft className="w-4 h-4" />
                         </a>
                         <a href="#decode" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors" title="Key Decoder">
                             <Search className="w-4 h-4" />

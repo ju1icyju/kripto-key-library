@@ -100,6 +100,14 @@
     <priority>0.5</priority>
   </url>
 
+  <!-- Crypto Unit Converter -->
+  <url>
+    <loc>https://ju1icyju.github.io/kripto-key-library/#converter</loc>
+    <lastmod>2026-02-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- About / Disclaimer -->
   <url>
     <loc>https://ju1icyju.github.io/kripto-key-library/#about</loc>
