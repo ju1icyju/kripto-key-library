@@ -4,6 +4,7 @@ import { useLang } from '../utils/i18n';
 import { generateWallet, MAX_PAGE, ROWS_PER_PAGE } from '../utils/crypto';
 import { checkBalances, AVAILABLE_NETWORKS, type SpeedMode, type BalanceResult } from '../utils/api';
 import { recordEliminated, incrementRandomClicks } from '../utils/supabase';
+import { trackElimination, trackTurboUsed } from '../utils/achievements';
 
 interface TurboResult {
     page: string;
@@ -98,6 +99,7 @@ export const TurboPanel: React.FC = () => {
         runningRef.current = true;
         setRunning(true);
         setStartTime(Date.now());
+        trackTurboUsed();
 
         while (runningRef.current && !controller.signal.aborted) {
             const pages = Array.from({ length: parallelPages }, () => generateRandomPage());
@@ -115,6 +117,7 @@ export const TurboPanel: React.FC = () => {
 
                 if (r.status === 'verified') {
                     setEliminatedCount(prev => prev + 1);
+                    trackElimination();
                 } else if (r.status === 'found') {
                     const total = r.balances.reduce((s, b) => s + b.balance, 0);
                     setTotalFoundUsd(prev => prev + total);
@@ -258,8 +261,8 @@ export const TurboPanel: React.FC = () => {
                                     key={name}
                                     onClick={() => toggleNetwork(name)}
                                     className={`px-4 py-2 rounded border text-sm font-bold transition-all ${enabledNetworks.includes(name)
-                                            ? 'border-terminal-accent bg-terminal-accent/10 text-terminal-accent'
-                                            : 'border-white/10 text-gray-600 hover:border-white/30'
+                                        ? 'border-terminal-accent bg-terminal-accent/10 text-terminal-accent'
+                                        : 'border-white/10 text-gray-600 hover:border-white/30'
                                         }`}
                                 >
                                     {name}
@@ -277,10 +280,10 @@ export const TurboPanel: React.FC = () => {
                                     key={opt.value}
                                     onClick={() => setSpeed(opt.value)}
                                     className={`px-4 py-2 rounded border text-sm font-bold transition-all ${speed === opt.value
-                                            ? opt.value === 'turbo'
-                                                ? 'border-yellow-400 bg-yellow-400/10 text-yellow-400'
-                                                : 'border-terminal-accent bg-terminal-accent/10 text-terminal-accent'
-                                            : 'border-white/10 text-gray-600 hover:border-white/30'
+                                        ? opt.value === 'turbo'
+                                            ? 'border-yellow-400 bg-yellow-400/10 text-yellow-400'
+                                            : 'border-terminal-accent bg-terminal-accent/10 text-terminal-accent'
+                                        : 'border-white/10 text-gray-600 hover:border-white/30'
                                         }`}
                                 >
                                     {opt.value === 'turbo' && '⚡ '}{opt.label}
@@ -353,8 +356,8 @@ export const TurboPanel: React.FC = () => {
                         {results.map((r, i) => (
                             <div key={`${r.page}-${r.timestamp}-${i}`}
                                 className={`flex items-center justify-between px-4 py-2 text-xs font-mono ${r.status === 'found' ? 'bg-terminal-warning/10' :
-                                        r.status === 'verified' ? 'bg-green-500/5' :
-                                            'bg-red-500/5'
+                                    r.status === 'verified' ? 'bg-green-500/5' :
+                                        'bg-red-500/5'
                                     }`}
                             >
                                 {r.status === 'found' ? (
@@ -371,8 +374,8 @@ export const TurboPanel: React.FC = () => {
                                     </span>
                                 )}
                                 <span className={`font-bold ${r.status === 'found' ? 'text-terminal-warning animate-pulse' :
-                                        r.status === 'verified' ? 'text-green-500' :
-                                            'text-red-500'
+                                    r.status === 'verified' ? 'text-green-500' :
+                                        'text-red-500'
                                     }`}>
                                     {r.status === 'found' ? `💰 $${r.balances.reduce((s, b) => s + b.balance, 0).toFixed(4)}` :
                                         r.status === 'verified' ? '✓ 0.00' : '✗ ERR'}

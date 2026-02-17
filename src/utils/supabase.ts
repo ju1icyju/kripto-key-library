@@ -34,6 +34,7 @@ export const setNickname = (name: string) => {
 
 export const recordEliminated = async (pageNumber: string, networksVerified: string[]): Promise<boolean> => {
     try {
+        // Try with nickname + user_id first
         const { error } = await supabase
             .from('eliminated_pages')
             .upsert({
@@ -44,8 +45,19 @@ export const recordEliminated = async (pageNumber: string, networksVerified: str
             }, { onConflict: 'page_number' });
 
         if (error) {
-            console.error('Supabase insert error:', error);
-            return false;
+            // Fallback: try without nickname/user_id (columns may not exist yet)
+            console.warn('Upsert with nickname failed, trying basic:', error.message);
+            const { error: fallbackError } = await supabase
+                .from('eliminated_pages')
+                .upsert({
+                    page_number: pageNumber,
+                    networks_verified: networksVerified,
+                }, { onConflict: 'page_number' });
+
+            if (fallbackError) {
+                console.error('Supabase insert error:', fallbackError);
+                return false;
+            }
         }
         return true;
     } catch (e) {
