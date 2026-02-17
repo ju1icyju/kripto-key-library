@@ -7,9 +7,10 @@ import { useLang } from '../utils/i18n';
 interface ControlsProps {
     currentPage: string;
     onPageChange: (page: string) => void;
+    onRandomClick?: () => void;
 }
 
-export const Controls: React.FC<ControlsProps> = ({ currentPage, onPageChange }) => {
+export const Controls: React.FC<ControlsProps> = ({ currentPage, onPageChange, onRandomClick }) => {
     const [inputPage, setInputPage] = useState('');
     const [randomClicks, setRandomClicks] = useState(0);
     const { t } = useLang();
@@ -27,6 +28,7 @@ export const Controls: React.FC<ControlsProps> = ({ currentPage, onPageChange })
 
         // Increment global counter (fire-and-forget)
         incrementRandomClicks();
+        onRandomClick?.();
 
         // Generate a random page
         const run = () => {

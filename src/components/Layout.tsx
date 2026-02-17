@@ -1,6 +1,7 @@
 import { type ReactNode, useState } from 'react';
-import { Terminal, Coffee, Info, Home, Check, Copy, Database, User, BarChart3, Globe, Zap } from 'lucide-react';
+import { Terminal, Coffee, Info, Home, Check, Copy, Database, User, BarChart3, Globe, Zap, Trophy, BookOpen, Award, Calendar } from 'lucide-react';
 import { useLang } from '../utils/i18n';
+import { trackLanguageSwitch } from '../utils/achievements';
 
 interface LayoutProps {
     children: ReactNode;
@@ -20,6 +21,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, eliminatedCount, sessi
 
     const toggleLang = () => {
         setLang(lang === 'ru' ? 'en' : 'ru');
+        trackLanguageSwitch();
     };
 
     return (
@@ -36,18 +38,30 @@ export const Layout: React.FC<LayoutProps> = ({ children, eliminatedCount, sessi
                             {t.siteNameShort}
                         </h1>
                     </div>
-                    <div className="flex items-center gap-3 md:gap-4 text-xs md:text-sm">
+                    <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm">
                         <a href="#" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
-                            <Home className="w-4 h-4" /> <span className="hidden md:inline">{t.navHome}</span>
+                            <Home className="w-4 h-4" /> <span className="hidden lg:inline">{t.navHome}</span>
                         </a>
                         <a href="#about" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
-                            <Info className="w-4 h-4" /> <span className="hidden md:inline">{t.navAbout}</span>
+                            <Info className="w-4 h-4" /> <span className="hidden lg:inline">{t.navAbout}</span>
                         </a>
                         <a href="#stats" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
-                            <BarChart3 className="w-4 h-4" /> <span className="hidden md:inline">{t.navStats}</span>
+                            <BarChart3 className="w-4 h-4" /> <span className="hidden lg:inline">{t.navStats}</span>
                         </a>
                         <a href="#turbo" className="flex items-center gap-1 text-yellow-400 hover:text-yellow-300 transition-colors">
-                            <Zap className="w-4 h-4" /> <span className="hidden md:inline">{t.turbo}</span>
+                            <Zap className="w-4 h-4" /> <span className="hidden lg:inline">{t.turbo}</span>
+                        </a>
+                        <a href="#leaderboard" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
+                            <Trophy className="w-4 h-4" /> <span className="hidden lg:inline">{t.navLeaderboard}</span>
+                        </a>
+                        <a href="#learn" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
+                            <BookOpen className="w-4 h-4" /> <span className="hidden lg:inline">{t.navLearn}</span>
+                        </a>
+                        <a href="#achievements" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors" title="Achievements">
+                            <Award className="w-4 h-4" />
+                        </a>
+                        <a href="#daily" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors" title="Daily">
+                            <Calendar className="w-4 h-4" />
                         </a>
                         <button
                             onClick={toggleLang}

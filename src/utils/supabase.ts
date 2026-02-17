@@ -8,6 +8,14 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 /**
  * Record a page as eliminated (verified empty on all networks).
  */
+export const getNickname = (): string => {
+    return localStorage.getItem('ukl_nickname') || 'Anon';
+};
+
+export const setNickname = (name: string) => {
+    localStorage.setItem('ukl_nickname', name.trim().slice(0, 20) || 'Anon');
+};
+
 export const recordEliminated = async (pageNumber: string, networksVerified: string[]): Promise<boolean> => {
     try {
         const { error } = await supabase
@@ -15,6 +23,7 @@ export const recordEliminated = async (pageNumber: string, networksVerified: str
             .upsert({
                 page_number: pageNumber,
                 networks_verified: networksVerified,
+                nickname: getNickname(),
             }, { onConflict: 'page_number' });
 
         if (error) {
@@ -113,4 +122,54 @@ export const getGlobalStats = async (): Promise<GlobalStats> => {
     } catch {
         return { total_random_clicks: 0, total_found_usd: 0, eliminated_count: 0 };
     }
+};
+
+// ─── Leaderboard ──────────────────────────────────────────
+
+export interface LeaderboardEntry {
+    nickname: string;
+    score: number;
+    last_active: string;
+}
+
+export const getLeaderboard = async (): Promise<LeaderboardEntry[]> => {
+    try {
+        // Query eliminated_pages grouped by nickname
+        const { data, error } = await supabase
+            .from('eliminated_pages')
+            .select('nickname');
+
+        if (error || !data) return [];
+
+        // Aggregate client-side (Supabase free tier doesn't support server-side grouping easily)
+        const counts: Record<string, number> = {};
+        for (const row of data) {
+            const name = row.nickname || 'Anon';
+            counts[name] = (counts[name] || 0) + 1;
+        }
+
+        return Object.entries(counts)
+            .map(([nickname, score]) => ({ nickname, score, last_active: '' }))
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 50);
+    } catch {
+        return [];
+    }
+};
+
+// ─── Daily Challenge ──────────────────────────────────────
+
+export const getDailyChallengePage = async (): Promise<string> => {
+    // Deterministic page from date: SHA-256("UKL-DAILY-2026-02-17")
+    const today = new Date().toISOString().slice(0, 10);
+    const data = new TextEncoder().encode(`UKL-DAILY-${today}`);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    const hex = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    const bigNum = BigInt('0x' + hex);
+    const MAX_PAGE = (2n ** 256n) / 128n;
+    return ((bigNum % MAX_PAGE) + 1n).toString();
+};
+
+export const isDailyChallengeCompleted = async (page: string): Promise<boolean> => {
+    return await isPageEliminated(page);
 };

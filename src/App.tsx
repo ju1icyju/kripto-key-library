@@ -5,14 +5,22 @@ import { Controls } from './components/Controls';
 import { Disclaimer } from './components/Disclaimer';
 import { Stats } from './components/Stats';
 import { TurboPanel } from './components/TurboPanel';
+import { Leaderboard } from './components/Leaderboard';
+import { Achievements } from './components/Achievements';
+import { DailyChallenge } from './components/DailyChallenge';
+import { CryptoGuide } from './components/CryptoGuide';
+import { ProbabilityCalc } from './components/ProbabilityCalc';
 import { TerminalAlert } from './components/TerminalAlert';
 import { formatBigInt } from './utils/formatters';
 import { getEliminatedCount } from './utils/supabase';
 import { LangProvider, useLang } from './utils/i18n';
+import { trackElimination, trackRandomClick, trackPageVisited, trackStatsVisited } from './utils/achievements';
+
+type ViewType = 'home' | 'disclaimer' | 'stats' | 'turbo' | 'leaderboard' | 'achievements' | 'daily' | 'learn' | 'calc';
 
 function AppContent() {
   const [page, setPage] = useState<bigint>(1n);
-  const [view, setView] = useState<'home' | 'disclaimer' | 'stats' | 'turbo'>('home');
+  const [view, setView] = useState<ViewType>('home');
   const [eliminatedCount, setEliminatedCount] = useState(0);
   const [sessionCount, setSessionCount] = useState(0);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -22,15 +30,20 @@ function AppContent() {
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash;
-      if (hash === '#about') {
-        setView('disclaimer');
-      } else if (hash === '#stats') {
-        setView('stats');
-      } else if (hash === '#turbo') {
-        setView('turbo');
-      } else {
-        setView('home');
-      }
+      const routes: Record<string, ViewType> = {
+        '#about': 'disclaimer',
+        '#stats': 'stats',
+        '#turbo': 'turbo',
+        '#leaderboard': 'leaderboard',
+        '#achievements': 'achievements',
+        '#daily': 'daily',
+        '#learn': 'learn',
+        '#calc': 'calc',
+      };
+      setView(routes[hash] || 'home');
+
+      // Achievement tracking
+      if (hash === '#stats') trackStatsVisited();
     };
 
     window.addEventListener('hashchange', handleHash);
@@ -73,6 +86,7 @@ function AppContent() {
   const handlePageChange = (newPage: string) => {
     try {
       setPage(BigInt(newPage));
+      trackPageVisited(newPage);
     } catch {
       // ignore
     }
@@ -80,6 +94,7 @@ function AppContent() {
 
   const handleEliminated = useCallback((pageNumber: string) => {
     setEliminatedCount(prev => prev + 1);
+    trackElimination();
 
     setSessionCount(prev => {
       const newCount = prev + 1;
@@ -95,10 +110,23 @@ function AppContent() {
     setTimeout(() => setAlertMessage(null), 5000);
   }, [t]);
 
-  return (
-    <>
-      <Layout eliminatedCount={eliminatedCount} sessionCount={sessionCount}>
-        {view === 'home' ? (
+  const handleRandomClick = useCallback(() => {
+    trackRandomClick();
+  }, []);
+
+  const renderView = () => {
+    switch (view) {
+      case 'stats': return <Stats />;
+      case 'turbo': return <TurboPanel />;
+      case 'leaderboard': return <Leaderboard />;
+      case 'achievements': return <Achievements />;
+      case 'daily': return <DailyChallenge />;
+      case 'learn': return <CryptoGuide />;
+      case 'calc': return <ProbabilityCalc />;
+      case 'disclaimer': return <Disclaimer />;
+      case 'home':
+      default:
+        return (
           <>
             <div className="mb-6 flex flex-col md:flex-row justify-between items-end gap-4 animate-in fade-in duration-500">
               <div>
@@ -109,17 +137,18 @@ function AppContent() {
               </div>
             </div>
 
-            <Controls currentPage={page.toString()} onPageChange={handlePageChange} />
+            <Controls currentPage={page.toString()} onPageChange={handlePageChange} onRandomClick={handleRandomClick} />
 
             <KeyTable pageNumber={page.toString()} onEliminated={handleEliminated} />
           </>
-        ) : view === 'stats' ? (
-          <Stats />
-        ) : view === 'turbo' ? (
-          <TurboPanel />
-        ) : (
-          <Disclaimer />
-        )}
+        );
+    }
+  };
+
+  return (
+    <>
+      <Layout eliminatedCount={eliminatedCount} sessionCount={sessionCount}>
+        {renderView()}
       </Layout>
 
       <TerminalAlert message={alertMessage} />
