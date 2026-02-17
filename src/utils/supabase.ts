@@ -5,6 +5,34 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ─── Rate Limiting ────────────────────────────────────────
+
+const rateLimitMap = new Map<string, number>();
+
+/** Returns true if action is allowed, false if rate-limited */
+const rateLimit = (key: string, cooldownMs: number): boolean => {
+    const now = Date.now();
+    const last = rateLimitMap.get(key) || 0;
+    if (now - last < cooldownMs) return false;
+    rateLimitMap.set(key, now);
+    return true;
+};
+
+// ─── Input Validation ─────────────────────────────────────
+
+const MAX_PAGE_DIGITS = 78; // 2^256/128 ≈ 9×10^74, max 78 digits
+
+const isValidPageNumber = (page: string): boolean => {
+    if (!page || page.length > MAX_PAGE_DIGITS) return false;
+    if (!/^\d+$/.test(page)) return false;
+    try {
+        const n = BigInt(page);
+        return n >= 1n && n <= (2n ** 256n / 128n);
+    } catch {
+        return false;
+    }
+};
+
 /**
  * Persistent user identity + nickname
  */
@@ -33,13 +61,23 @@ export const setNickname = (name: string) => {
 };
 
 export const recordEliminated = async (pageNumber: string, networksVerified: string[]): Promise<boolean> => {
+    // Validate inputs
+    if (!isValidPageNumber(pageNumber)) {
+        console.warn('Invalid page number, skipping record:', pageNumber.slice(0, 20));
+        return false;
+    }
+    if (!Array.isArray(networksVerified) || networksVerified.length === 0 || networksVerified.length > 10) {
+        return false;
+    }
+    // Rate limit: max 1 elimination per 2 seconds
+    if (!rateLimit('eliminate', 2000)) return false;
+
     try {
-        // Try with nickname + user_id first
         const { error } = await supabase
             .from('eliminated_pages')
             .upsert({
                 page_number: pageNumber,
-                networks_verified: networksVerified,
+                networks_verified: networksVerified.slice(0, 10),
                 nickname: getNickname(),
                 user_id: getUserId(),
             }, { onConflict: 'page_number' });
@@ -51,7 +89,7 @@ export const recordEliminated = async (pageNumber: string, networksVerified: str
                 .from('eliminated_pages')
                 .upsert({
                     page_number: pageNumber,
-                    networks_verified: networksVerified,
+                    networks_verified: networksVerified.slice(0, 10),
                 }, { onConflict: 'page_number' });
 
             if (fallbackError) {
@@ -115,6 +153,8 @@ export interface GlobalStats {
  * Increment the global random click counter by 1.
  */
 export const incrementRandomClicks = async (): Promise<void> => {
+    // Rate limit: max 1 RPC call per second (prevents spam)
+    if (!rateLimit('click', 1000)) return;
     try {
         await supabase.rpc('increment_random_clicks');
     } catch (e) {
@@ -126,6 +166,13 @@ export const incrementRandomClicks = async (): Promise<void> => {
  * Record found USD amount (additive).
  */
 export const recordFoundUsd = async (amount: number): Promise<void> => {
+    // Validate amount (must be reasonable)
+    if (typeof amount !== 'number' || amount <= 0 || amount > 1000000 || !isFinite(amount)) {
+        console.warn('Invalid USD amount:', amount);
+        return;
+    }
+    // Rate limit: max 1 per 5 seconds
+    if (!rateLimit('found_usd', 5000)) return;
     try {
         await supabase.rpc('add_found_usd', { amount });
     } catch (e) {
