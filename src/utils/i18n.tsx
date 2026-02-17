@@ -213,6 +213,22 @@ const translations = {
         whalesDesc: 'Самые известные и крупнейшие кошельки Bitcoin и Ethereum. Каждый из этих адресов хранится где-то в бесконечных страницах библиотеки ключей — но найти его номер невозможно без приватного ключа.',
         whalesApprox: '≈ баланс',
         whalesPageNote: 'Этот адрес существует на одной из ~9×10⁷⁴ страниц библиотеки. Обратное вычисление страницы по адресу — вычислительно невозможно (это и есть криптография!).',
+
+        // Multi Checker
+        checkerTitle: 'МУЛЬТИ-ЧЕКЕР АДРЕСОВ',
+        checkerSubtitle: 'Проверь балансы до 50 адресов сразу',
+        checkerSeoDesc: 'Бесплатный инструмент для массовой проверки балансов Ethereum и Bitcoin адресов. Вставьте список адресов и мгновенно узнайте баланс каждого.',
+        checkerInputLabel: 'Адреса (по одному на строку)',
+        checkerPlaceholder: '0x742d35Cc6634C0532925a3b844Bc9e7595f2bD28\nbc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh\n...',
+        checkerStart: 'ПРОВЕРИТЬ',
+        checkerStop: 'ОСТАНОВИТЬ',
+        checkerMax50: 'Максимум 50 адресов за раз',
+        checkerUnknownFormat: 'Неизвестный формат адреса',
+        checkerAddresses: 'Адресов',
+        checkerWithBalance: 'С балансом',
+        checkerCta: 'Хотите исследовать все 2²⁵⁶ возможных приватных ключей?',
+        checkerCtaExplore: 'БИБЛИОТЕКА КЛЮЧЕЙ',
+        checkerCtaTurbo: 'ТУРБО-СКАНЕР',
     },
     en: {
         // Layout
@@ -424,6 +440,22 @@ const translations = {
         whalesDesc: 'The most famous and largest Bitcoin and Ethereum wallets. Each of these addresses exists somewhere in the infinite pages of the key library — but finding its page number is impossible without the private key.',
         whalesApprox: '≈ balance',
         whalesPageNote: 'This address lives on one of ~9×10⁷⁴ library pages. Reverse-computing the page from an address is computationally impossible (that\'s cryptography!).',
+
+        // Multi Checker
+        checkerTitle: 'MULTI-ADDRESS CHECKER',
+        checkerSubtitle: 'Check balances of up to 50 addresses at once',
+        checkerSeoDesc: 'Free tool for bulk checking Ethereum and Bitcoin address balances. Paste your list of addresses and instantly see the balance of each one.',
+        checkerInputLabel: 'Addresses (one per line)',
+        checkerPlaceholder: '0x742d35Cc6634C0532925a3b844Bc9e7595f2bD28\nbc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh\n...',
+        checkerStart: 'CHECK',
+        checkerStop: 'STOP',
+        checkerMax50: 'Maximum 50 addresses at a time',
+        checkerUnknownFormat: 'Unknown address format',
+        checkerAddresses: 'Addresses',
+        checkerWithBalance: 'With balance',
+        checkerCta: 'Want to explore all 2²⁵⁶ possible private keys?',
+        checkerCtaExplore: 'KEY LIBRARY',
+        checkerCtaTurbo: 'TURBO SCANNER',
     },
 };
 

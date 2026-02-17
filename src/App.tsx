@@ -13,13 +13,14 @@ import { ProbabilityCalc } from './components/ProbabilityCalc';
 import { KeyDecoder } from './components/KeyDecoder';
 import { Museum } from './components/Museum';
 import { WhaleGallery } from './components/WhaleGallery';
+import { MultiChecker } from './components/MultiChecker';
 import { TerminalAlert } from './components/TerminalAlert';
 import { formatBigInt } from './utils/formatters';
 import { getEliminatedCount } from './utils/supabase';
 import { LangProvider, useLang } from './utils/i18n';
 import { trackElimination, trackRandomClick, trackPageVisited, trackStatsVisited } from './utils/achievements';
 
-type ViewType = 'home' | 'disclaimer' | 'stats' | 'turbo' | 'leaderboard' | 'achievements' | 'daily' | 'learn' | 'calc' | 'decode' | 'museum' | 'whales';
+type ViewType = 'home' | 'disclaimer' | 'stats' | 'turbo' | 'leaderboard' | 'achievements' | 'daily' | 'learn' | 'calc' | 'decode' | 'museum' | 'whales' | 'checker';
 
 function AppContent() {
   const [page, setPage] = useState<bigint>(1n);
@@ -45,6 +46,7 @@ function AppContent() {
         '#decode': 'decode',
         '#museum': 'museum',
         '#whales': 'whales',
+        '#checker': 'checker',
       };
       setView(routes[hash] || 'home');
 
@@ -144,6 +146,7 @@ function AppContent() {
       case 'decode': return <KeyDecoder />;
       case 'museum': return <Museum />;
       case 'whales': return <WhaleGallery />;
+      case 'checker': return <MultiChecker />;
       case 'disclaimer': return <Disclaimer />;
       case 'home':
       default:
