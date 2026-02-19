@@ -3,7 +3,7 @@ import { Zap, Play, Square, Activity, Gauge, Trash2, DollarSign, Settings2, Exte
 import { useLang } from '../utils/i18n';
 import { generateWallet, MAX_PAGE, ROWS_PER_PAGE } from '../utils/crypto';
 import { checkBalances, AVAILABLE_NETWORKS, type SpeedMode, type BalanceResult } from '../utils/api';
-import { recordEliminated, incrementRandomClicks, recordFoundWallet } from '../utils/supabase';
+import { recordEliminated, incrementRandomClicks, recordFoundWallet, recordBatchEliminated } from '../utils/supabase';
 import { trackElimination, trackTurboUsed } from '../utils/achievements';
 
 interface TurboResult {
@@ -93,6 +93,27 @@ export const TurboPanel: React.FC = () => {
         }
     }, [speed, enabledNetworks]);
 
+    // Batch elimination buffer
+    const eliminatedBufferRef = useRef<{ page: string; networks: string[] }[]>([]);
+
+    const flushEliminations = useCallback(async () => {
+        const batch = [...eliminatedBufferRef.current];
+        if (batch.length === 0) return;
+
+        eliminatedBufferRef.current = [];
+        await recordBatchEliminated(batch);
+    }, []);
+
+    // Flush periodically
+    useEffect(() => {
+        if (!running) return;
+        const timer = setInterval(flushEliminations, 5000);
+        return () => {
+            clearInterval(timer);
+            flushEliminations(); // flush on stop
+        };
+    }, [running, flushEliminations]);
+
     const runTurbo = useCallback(async () => {
         const controller = new AbortController();
         abortRef.current = controller;
@@ -118,6 +139,11 @@ export const TurboPanel: React.FC = () => {
                 if (r.status === 'verified') {
                     setEliminatedCount(prev => prev + 1);
                     trackElimination();
+                    // Add to batch buffer
+                    eliminatedBufferRef.current.push({ page: r.page, networks: ['ETH', 'BNB'] }); // Turbo only checks these
+                    if (eliminatedBufferRef.current.length >= 50) {
+                        flushEliminations();
+                    }
                 } else if (r.status === 'found') {
                     const total = r.balances.reduce((s, b) => s + b.balance, 0);
                     setTotalFoundUsd(prev => prev + total);
@@ -139,13 +165,15 @@ export const TurboPanel: React.FC = () => {
                     runningRef.current = false;
                     controller.abort();
                     setRunning(false);
+                    flushEliminations();
                     return;
                 }
             }
         }
 
         setRunning(false);
-    }, [parallelPages, scanPage]);
+        flushEliminations();
+    }, [parallelPages, scanPage, flushEliminations]);
 
     const stopTurbo = useCallback(() => {
         runningRef.current = false;

@@ -5,7 +5,6 @@ import { Controls } from './components/Controls';
 import { Disclaimer } from './components/Disclaimer';
 import { Stats } from './components/Stats';
 import { TurboPanel } from './components/TurboPanel';
-import { Leaderboard } from './components/Leaderboard';
 import { Achievements } from './components/Achievements';
 import { DailyChallenge } from './components/DailyChallenge';
 import { CryptoGuide } from './components/CryptoGuide';
@@ -21,7 +20,7 @@ import { getEliminatedCount } from './utils/supabase';
 import { LangProvider, useLang } from './utils/i18n';
 import { trackElimination, trackRandomClick, trackPageVisited, trackStatsVisited } from './utils/achievements';
 
-type ViewType = 'home' | 'disclaimer' | 'stats' | 'turbo' | 'leaderboard' | 'achievements' | 'daily' | 'learn' | 'calc' | 'decode' | 'museum' | 'whales' | 'checker' | 'converter';
+type ViewType = 'home' | 'disclaimer' | 'stats' | 'turbo' | 'achievements' | 'daily' | 'learn' | 'calc' | 'decode' | 'museum' | 'whales' | 'checker' | 'converter';
 
 function AppContent() {
   const [page, setPage] = useState<bigint>(1n);
@@ -39,7 +38,6 @@ function AppContent() {
         '#about': 'disclaimer',
         '#stats': 'stats',
         '#turbo': 'turbo',
-        '#leaderboard': 'leaderboard',
         '#achievements': 'achievements',
         '#daily': 'daily',
         '#learn': 'learn',
@@ -140,7 +138,6 @@ function AppContent() {
     switch (view) {
       case 'stats': return <Stats />;
       case 'turbo': return <TurboPanel />;
-      case 'leaderboard': return <Leaderboard />;
       case 'achievements': return <Achievements />;
       case 'daily': return <DailyChallenge />;
       case 'learn': return <CryptoGuide />;

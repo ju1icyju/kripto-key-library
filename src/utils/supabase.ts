@@ -61,46 +61,48 @@ export const setNickname = (name: string) => {
 };
 
 export const recordEliminated = async (pageNumber: string, networksVerified: string[]): Promise<boolean> => {
-    // Validate inputs
-    if (!isValidPageNumber(pageNumber)) {
-        console.warn('Invalid page number, skipping record:', pageNumber.slice(0, 20));
-        return false;
-    }
-    if (!Array.isArray(networksVerified) || networksVerified.length === 0 || networksVerified.length > 10) {
-        return false;
-    }
-    // Rate limit: max 1 elimination per 2 seconds
-    if (!rateLimit('eliminate', 2000)) return false;
+    // Single record (legacy / manual check)
+    if (!isValidPageNumber(pageNumber)) return false;
+    if (!rateLimit('eliminate', 1000)) return false;
 
     try {
-        const { error } = await supabase
-            .from('eliminated_pages')
-            .upsert({
-                page_number: pageNumber,
-                networks_verified: networksVerified.slice(0, 10),
+        await supabase.from('eliminated_pages').upsert({
+            page_number: pageNumber,
+            networks_verified: networksVerified.slice(0, 10),
+            nickname: getNickname(),
+            user_id: getUserId(),
+        }, { onConflict: 'page_number' });
+        return true;
+    } catch {
+        return false;
+    }
+};
+
+/**
+ * Record a batch of eliminated pages (for Turbo mode).
+ * Bypasses per-item rate limit, uses batch rate limit.
+ */
+export const recordBatchEliminated = async (pages: { page: string; networks: string[] }[]): Promise<void> => {
+    if (pages.length === 0) return;
+    // Rate limit: max 1 batch per 3 seconds
+    if (!rateLimit('batch_eliminate', 3000)) return;
+
+    try {
+        const rows = pages
+            .filter(p => isValidPageNumber(p.page))
+            .map(p => ({
+                page_number: p.page,
+                networks_verified: p.networks.slice(0, 10),
                 nickname: getNickname(),
                 user_id: getUserId(),
-            }, { onConflict: 'page_number' });
+            }));
 
-        if (error) {
-            // Fallback: try without nickname/user_id (columns may not exist yet)
-            console.warn('Upsert with nickname failed, trying basic:', error.message);
-            const { error: fallbackError } = await supabase
-                .from('eliminated_pages')
-                .upsert({
-                    page_number: pageNumber,
-                    networks_verified: networksVerified.slice(0, 10),
-                }, { onConflict: 'page_number' });
+        if (rows.length === 0) return;
 
-            if (fallbackError) {
-                console.error('Supabase insert error:', fallbackError);
-                return false;
-            }
-        }
-        return true;
+        const { error } = await supabase.from('eliminated_pages').upsert(rows, { onConflict: 'page_number', ignoreDuplicates: true });
+        if (error) console.error('Batch upload error:', error);
     } catch (e) {
-        console.error('Supabase connection error:', e);
-        return false;
+        console.error('Batch upload failed:', e);
     }
 };
 
@@ -223,45 +225,6 @@ export const getGlobalStats = async (): Promise<GlobalStats> => {
         };
     } catch {
         return { total_random_clicks: 0, total_found_usd: 0, eliminated_count: 0 };
-    }
-};
-
-// ─── Leaderboard ──────────────────────────────────────────
-
-export interface LeaderboardEntry {
-    nickname: string;
-    user_id: string;
-    score: number;
-}
-
-export const getLeaderboard = async (): Promise<LeaderboardEntry[]> => {
-    try {
-        const { data, error } = await supabase
-            .from('eliminated_pages')
-            .select('nickname, user_id');
-
-        if (error || !data) return [];
-
-        // Group by user_id, take latest nickname per user
-        const users: Record<string, { nickname: string; score: number }> = {};
-        for (const row of data) {
-            const uid = row.user_id || 'unknown';
-            if (!users[uid]) {
-                users[uid] = { nickname: row.nickname || 'Anon', score: 0 };
-            }
-            users[uid].score++;
-            // Always update to latest nickname (last seen)
-            if (row.nickname && row.nickname !== 'Anon') {
-                users[uid].nickname = row.nickname;
-            }
-        }
-
-        return Object.entries(users)
-            .map(([user_id, data]) => ({ user_id, nickname: data.nickname, score: data.score }))
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 50);
-    } catch {
-        return [];
     }
 };
 
