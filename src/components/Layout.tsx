@@ -54,31 +54,32 @@ export const Layout: React.FC<LayoutProps> = ({ children, eliminatedCount, sessi
                         <a href="#learn" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
                             <BookOpen className="w-4 h-4" /> <span className="hidden lg:inline">{t.navLearn}</span>
                         </a>
-                        <a href="#converter" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors" title="Unit Converter">
+                        <a href="#converter" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors" title="Unit Converter" aria-label="Unit Converter">
                             <ArrowRightLeft className="w-4 h-4" />
                         </a>
-                        <a href="#decode" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors" title="Key Decoder">
+                        <a href="#decode" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors" title="Key Decoder" aria-label="Key Decoder">
                             <Search className="w-4 h-4" />
                         </a>
-                        <a href="#checker" className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors" title="Multi-Checker">
+                        <a href="#checker" className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors" title="Multi-Checker" aria-label="Multi-Address Checker">
                             <Wallet className="w-4 h-4" />
                         </a>
-                        <a href="#museum" className="flex items-center gap-1 text-yellow-400 hover:text-yellow-300 transition-colors" title="Museum">
+                        <a href="#museum" className="flex items-center gap-1 text-yellow-400 hover:text-yellow-300 transition-colors" title="Museum" aria-label="Museum of Finds">
                             <Landmark className="w-4 h-4" />
                         </a>
-                        <a href="#whales" className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors" title="Whales">
+                        <a href="#whales" className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors" title="Whales" aria-label="Whale Gallery">
                             <Fish className="w-4 h-4" />
                         </a>
-                        <a href="#achievements" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors" title="Achievements">
+                        <a href="#achievements" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors" title="Achievements" aria-label="Achievements">
                             <Award className="w-4 h-4" />
                         </a>
-                        <a href="#daily" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors" title="Daily">
+                        <a href="#daily" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors" title="Daily" aria-label="Daily Challenge">
                             <Calendar className="w-4 h-4" />
                         </a>
                         <button
                             onClick={toggleLang}
                             className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors border border-white/10 px-2 py-1 rounded hover:border-terminal-accent/50"
                             title="Switch language"
+                            aria-label={`Switch to ${lang === 'ru' ? 'English' : 'Russian'}`}
                         >
                             <Globe className="w-3 h-3" />
                             <span className="text-xs font-bold">{lang === 'ru' ? 'EN' : 'RU'}</span>

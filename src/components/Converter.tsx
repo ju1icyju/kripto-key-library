@@ -58,12 +58,12 @@ export const Converter: React.FC = () => {
                 const sats = Math.round(parseFloat(val) * 1e8);
                 newValues.sats = isNaN(sats) ? '' : sats.toString();
             } else if (source === 'sats') {
-                const btc = parseFloat(val) / 1e8;
-                newValues.btc = isNaN(btc) ? '' : btc.toFixed(8).replace(/\.?0+$/, '');
+                const sats = parseInt(val, 10);
+                const btc = sats / 1e8;
+                newValues.btc = isNaN(btc) ? '' : btc.toFixed(8);
             }
-        } catch (e) {
+        } catch {
             // ignore parse errors while typing
-            console.debug(e);
         }
 
         setValues(newValues);
@@ -87,12 +87,17 @@ export const Converter: React.FC = () => {
                 </div>
             </div>
 
+            {/* SEO description */}
+            <p className="text-gray-500 text-sm mb-6">
+                {t.converterSeoDesc}
+            </p>
+
             <div className="glass-panel border border-white/10 rounded-lg p-6 space-y-6">
 
                 {/* ETH Section */}
                 <div>
                     <h3 className="text-xs text-blue-400 uppercase tracking-widest mb-3 font-bold border-b border-blue-500/20 pb-2">
-                        Ethereum Units
+                        {t.converterEthUnits}
                     </h3>
                     <div className="space-y-4">
                         {UNITS.filter(u => ['eth', 'gwei', 'wei'].includes(u.id)).map(unit => (
@@ -101,6 +106,7 @@ export const Converter: React.FC = () => {
                                 <div className="relative">
                                     <input
                                         type="text"
+                                        inputMode="decimal"
                                         value={values[unit.id]}
                                         onChange={e => updateValues(unit.id, e.target.value)}
                                         placeholder={unit.placeholder}
@@ -122,7 +128,7 @@ export const Converter: React.FC = () => {
                 {/* BTC Section */}
                 <div>
                     <h3 className="text-xs text-orange-400 uppercase tracking-widest mb-3 font-bold border-b border-orange-500/20 pb-2">
-                        Bitcoin Units
+                        {t.converterBtcUnits}
                     </h3>
                     <div className="space-y-4">
                         {UNITS.filter(u => ['btc', 'sats'].includes(u.id)).map(unit => (
@@ -131,6 +137,7 @@ export const Converter: React.FC = () => {
                                 <div className="relative">
                                     <input
                                         type="text"
+                                        inputMode="decimal"
                                         value={values[unit.id]}
                                         onChange={e => updateValues(unit.id, e.target.value)}
                                         placeholder={unit.placeholder}

@@ -16,5 +16,22 @@ export default defineConfig({
   server: {
     host: true,
     port: 3000,
-  }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          // Heavy crypto libs → separate vendor chunk (cached independently)
+          if (id.includes('ethers') || id.includes('bitcoinjs-lib') || id.includes('ecpair') || id.includes('tiny-secp256k1')) {
+            return 'vendor-crypto';
+          }
+          // React + React-DOM → separate vendor chunk
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'vendor-react';
+          }
+        },
+      },
+    },
+  },
 })
+

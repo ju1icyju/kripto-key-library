@@ -23,7 +23,7 @@ export const ScanEffect: React.FC<ScanEffectProps> = ({ finalValue = "0.00", dur
             } else {
                 setDisplay(randomBal());
             }
-        }, 50);
+        }, 150);
 
         return () => clearInterval(interval);
     }, [finalValue, duration]);

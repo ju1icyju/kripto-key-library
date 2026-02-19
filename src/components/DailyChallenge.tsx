@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Sparkles, Target, Clock, ArrowRight, Dice5 } from 'lucide-react';
 import { useLang } from '../utils/i18n';
 import { getDailyLuckyPage } from '../utils/supabase';
+import { trackDailyWin } from '../utils/achievements';
 
 export const DailyChallenge: React.FC = () => {
     const { t } = useLang();
@@ -48,6 +49,7 @@ export const DailyChallenge: React.FC = () => {
         setRevealed(true);
         const todayKey = `ukl_lucky_revealed_${new Date().toISOString().slice(0, 10)}`;
         localStorage.setItem(todayKey, '1');
+        trackDailyWin();
     };
 
     const navigateToPage = () => {

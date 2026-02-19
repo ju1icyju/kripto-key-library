@@ -27,7 +27,6 @@ export const Achievements: React.FC = () => {
                     data_nerd: t.achDataNerd,
                     daily_winner: t.achDailyWinner,
                     polyglot: t.achPolyglot,
-                    bot_friend: t.achBotFriend,
                 };
                 setToast(`🏅 ${achNames[id] || id}`);
                 refreshAchievements();
@@ -50,7 +49,6 @@ export const Achievements: React.FC = () => {
         data_nerd: { name: t.achDataNerd, desc: t.achDataNerdDesc },
         daily_winner: { name: t.achDailyWinner, desc: t.achDailyWinnerDesc },
         polyglot: { name: t.achPolyglot, desc: t.achPolyglotDesc },
-        bot_friend: { name: t.achBotFriend, desc: t.achBotFriendDesc },
     };
 
     const unlocked = achievements.filter(a => a.unlockedAt !== null).length;
@@ -97,8 +95,8 @@ export const Achievements: React.FC = () => {
                         <div
                             key={ach.id}
                             className={`glass-panel border rounded-lg p-4 flex items-center gap-4 transition-all ${isUnlocked
-                                    ? 'border-terminal-accent/30 bg-terminal-accent/5'
-                                    : 'border-white/5 opacity-50 grayscale'
+                                ? 'border-terminal-accent/30 bg-terminal-accent/5'
+                                : 'border-white/5 opacity-50 grayscale'
                                 }`}
                         >
                             <div className={`text-3xl ${isUnlocked ? '' : 'opacity-30'}`}>

@@ -17,8 +17,7 @@ export type AchievementId =
     | 'explorer'
     | 'data_nerd'
     | 'daily_winner'
-    | 'polyglot'
-    | 'bot_friend';
+    | 'polyglot';
 
 export const ACHIEVEMENT_DEFS: { id: AchievementId; icon: string }[] = [
     { id: 'first_blood', icon: '🌱' },
@@ -31,7 +30,6 @@ export const ACHIEVEMENT_DEFS: { id: AchievementId; icon: string }[] = [
     { id: 'data_nerd', icon: '📊' },
     { id: 'daily_winner', icon: '🏆' },
     { id: 'polyglot', icon: '🌐' },
-    { id: 'bot_friend', icon: '🤖' },
 ];
 
 const STORAGE_KEY = 'ukl_achievements';
@@ -138,7 +136,9 @@ export const trackTurboUsed = () => {
 export const trackPageVisited = (page: string) => {
     try {
         const pageBig = BigInt(page);
-        if (pageBig > BigInt('1' + '0'.repeat(70))) {
+        // Explorer threshold: any page number > 10^32
+        // (MAX_PAGE ≈ 2.7×10^36, so this is achievable by entering large page numbers)
+        if (pageBig > BigInt('1' + '0'.repeat(32))) {
             unlockAchievement('explorer');
         }
     } catch { /* ignore */ }

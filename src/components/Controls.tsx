@@ -43,17 +43,21 @@ export const Controls: React.FC<ControlsProps> = ({ currentPage, onPageChange, o
     };
 
     const handlePrev = () => {
-        const current = BigInt(currentPage);
-        if (current > 1n) {
-            onPageChange((current - 1n).toString());
-        }
+        try {
+            const current = BigInt(currentPage);
+            if (current > 1n) {
+                onPageChange((current - 1n).toString());
+            }
+        } catch { /* ignore */ }
     };
 
     const handleNext = () => {
-        const current = BigInt(currentPage);
-        if (current < MAX_PAGE) {
-            onPageChange((current + 1n).toString());
-        }
+        try {
+            const current = BigInt(currentPage);
+            if (current < MAX_PAGE) {
+                onPageChange((current + 1n).toString());
+            }
+        } catch { /* ignore */ }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -118,7 +122,8 @@ export const Controls: React.FC<ControlsProps> = ({ currentPage, onPageChange, o
 
                     <button
                         onClick={handleNext}
-                        className="border border-white/20 text-white px-4 py-3 rounded hover:bg-white/10 transition-colors"
+                        disabled={currentPage === MAX_PAGE.toString()}
+                        className="border border-white/20 text-white px-4 py-3 rounded hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                         title={t.nextPage}
                     >
                         <ArrowRight className="w-4 h-4" />

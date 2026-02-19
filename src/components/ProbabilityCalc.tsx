@@ -42,28 +42,31 @@ export const ProbabilityCalc: React.FC = () => {
         const atomsInUniverse = 80; // 10^80 atoms
         const comparison = logTotalSpace - logTotalKeys;
 
-        let comparisonText: string;
-        if (comparison > atomsInUniverse) {
-            comparisonText = '🌌 ...1 атом среди ∞ вселенных';
-        } else if (comparison > 50) {
-            const universes = Math.pow(10, comparison - atomsInUniverse);
-            comparisonText = `🌌 ...1 атом среди ${universes.toExponential(1)} вселенных`;
-        } else if (comparison > 20) {
-            comparisonText = `🏖️ ...1 песчинку среди 10^${comparison.toFixed(0)} пляжей`;
-        } else if (comparison > 10) {
-            comparisonText = `🎯 ...1 человека среди 10^${comparison.toFixed(0)} планет`;
-        } else {
-            comparisonText = `🔍 Пространство почти исчерпано!`;
-        }
-
         return {
             totalKeysChecked: totalKeysChecked.toExponential(2),
             percentageStr,
             probabilityStr,
-            comparisonText,
             logTotalKeys,
+            comparison,
+            atomsInUniverse,
         };
     }, [people, pagesPerSec, years]);
+
+    const comparisonText = useMemo(() => {
+        const { comparison, atomsInUniverse } = results;
+        if (comparison > atomsInUniverse) {
+            return t.calcCompInfinity;
+        } else if (comparison > 50) {
+            const universes = Math.pow(10, comparison - atomsInUniverse);
+            return t.calcCompUniverses.replace('{n}', universes.toExponential(1));
+        } else if (comparison > 20) {
+            return t.calcCompSand.replace('{n}', comparison.toFixed(0));
+        } else if (comparison > 10) {
+            return t.calcCompPeople.replace('{n}', comparison.toFixed(0));
+        } else {
+            return t.calcCompNear;
+        }
+    }, [results, t]);
 
     const presets = [
         { label: t.calcPreset1, icon: <User className="w-3 h-3" />, people: 1, speed: 10, years: 100 },
@@ -135,7 +138,7 @@ export const ProbabilityCalc: React.FC = () => {
             <div className="space-y-3">
                 {/* Keys checked */}
                 <div className="glass-panel border border-white/10 rounded-lg p-4">
-                    <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">🔑 Keys checked</div>
+                    <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">🔑 {t.calcKeysChecked}</div>
                     <div className="text-xl font-bold font-mono text-terminal-accent">{results.totalKeysChecked}</div>
                 </div>
 
@@ -160,7 +163,7 @@ export const ProbabilityCalc: React.FC = () => {
                 {/* Comparison */}
                 <div className="glass-panel border border-terminal-accent/20 bg-terminal-accent/5 rounded-lg p-4">
                     <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">{t.calcComparison}</div>
-                    <div className="text-lg font-bold text-white">{results.comparisonText}</div>
+                    <div className="text-lg font-bold text-white">{comparisonText}</div>
                 </div>
 
                 {/* Educational context */}

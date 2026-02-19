@@ -164,14 +164,14 @@ export const CryptoGuide: React.FC = () => {
                     disabled={step === 0}
                     className="px-4 py-2 border border-white/10 rounded text-sm text-gray-400 hover:text-white hover:border-white/30 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                    ← Back
+                    {t.guideBack}
                 </button>
                 <button
                     onClick={() => setStep(Math.min(steps.length - 1, step + 1))}
                     disabled={step === steps.length - 1}
                     className="px-4 py-2 border border-terminal-accent/50 rounded text-sm text-terminal-accent hover:bg-terminal-accent/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
                 >
-                    Next <ArrowRight className="w-3 h-3" />
+                    {t.guideNext} <ArrowRight className="w-3 h-3" />
                 </button>
             </div>
 

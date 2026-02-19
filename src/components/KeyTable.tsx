@@ -52,6 +52,7 @@ export const KeyTable: React.FC<KeyTableProps> = ({ pageNumber, onEliminated }) 
         setScanKey(prev => prev + 1);
 
         const runCheck = async () => {
+            // Reuse the already-computed rows from the useMemo above — no need to regenerate wallets
             const ethAddresses = rows.map(r => r.ethAddress);
 
             try {
@@ -100,7 +101,7 @@ export const KeyTable: React.FC<KeyTableProps> = ({ pageNumber, onEliminated }) 
             controller.abort();
             clearTimeout(timer);
         };
-    }, [pageNumber, rows]);
+    }, [pageNumber, rows]); // rows is derived from pageNumber, both needed
 
     const getRowBalanceDisplay = (ethAddr: string) => {
         const found = foundItems.find(f => f.address === ethAddr);

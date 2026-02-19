@@ -1,9 +1,34 @@
 import { ethers } from 'ethers';
 
-const NETWORKS = [
-    { name: 'ETH', url: 'https://rpc.ankr.com/eth', ticker: 'ETH' },
-    { name: 'BNB', url: 'https://bsc-dataseed1.binance.org/', ticker: 'BNB' }
+export const NETWORKS = [
+    {
+        name: 'ETH',
+        urls: [
+            'https://rpc.ankr.com/eth',
+            'https://eth.llamarpc.com',
+            'https://cloudflare-eth.com',
+            'https://1rpc.io/eth'
+        ],
+        ticker: 'ETH'
+    },
+    {
+        name: 'BNB',
+        urls: [
+            'https://bsc-dataseed1.binance.org/',
+            'https://bsc-dataseed2.binance.org/',
+            'https://rpc.ankr.com/bsc',
+            'https://binance.llamarpc.com'
+        ],
+        ticker: 'BNB'
+    }
 ];
+
+// Simple round-robin or random selection could work, but we'll try sequential failover per batch
+const getRpcUrl = (networkName: string, attempt: number) => {
+    const net = NETWORKS.find(n => n.name === networkName);
+    if (!net) return '';
+    return net.urls[attempt % net.urls.length];
+};
 
 const createBatchPayload = (addresses: string[], idStart: number) => {
     return addresses.map((addr, i) => ({
@@ -94,54 +119,89 @@ export const checkBalances = async (
             }
 
             try {
-                const payload = createBatchPayload(chunk, 1);
-                const response = await fetch(network.url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                    signal,
-                });
+                let rpcSuccess = false;
+                // Try up to 3 RPCs per chunk
+                for (let attempt = 0; attempt < 3; attempt++) {
+                    const rpcUrl = getRpcUrl(network.name, attempt);
+                    try {
+                        const payload = createBatchPayload(chunk, 1);
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
-                if (!response.ok) {
-                    const errMsg = `${network.name} chunk ${ci}: HTTP ${response.status}`;
+                        // Combine user signal + timeout — compatible with all browsers (no AbortSignal.any)
+                        const finalSignal = (() => {
+                            if (!signal) return controller.signal;
+                            const combined = new AbortController();
+                            const abort = () => combined.abort();
+                            if (signal.aborted || controller.signal.aborted) { combined.abort(); }
+                            else {
+                                signal.addEventListener('abort', abort, { once: true });
+                                controller.signal.addEventListener('abort', abort, { once: true });
+                            }
+                            return combined.signal;
+                        })();
+
+                        const response = await fetch(rpcUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload),
+                            signal: finalSignal,
+                        }).finally(() => clearTimeout(timeoutId));
+
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                        const data = await response.json();
+
+                        // Process data...
+                        if (Array.isArray(data)) {
+                            data.forEach((item: any, index: number) => {
+                                const balanceHex = item.result;
+                                if (balanceHex && balanceHex !== '0x0') {
+                                    const balanceWei = BigInt(balanceHex);
+                                    if (balanceWei > 0n) {
+                                        const etherVal = Number(ethers.formatEther(balanceWei));
+                                        if (etherVal > 0) {
+                                            result.balances.push({
+                                                address: chunk[index],
+                                                balance: etherVal,
+                                                symbol: network.ticker
+                                            });
+                                        }
+                                    }
+                                }
+                            });
+                        }
+
+                        result.chunkStatuses.push({
+                            network: network.name,
+                            chunkIndex: ci,
+                            status: 'ok',
+                        });
+                        successfulChunks++;
+                        rpcSuccess = true;
+                        break; // Success, exit retry loop
+
+                    } catch (e: any) {
+                        if (e.name === 'AbortError' && signal?.aborted) throw e; // User aborted
+                        // Otherwise it's an RPC error, try next
+                        console.warn(`${network.name} RPC ${rpcUrl} failed:`, e.message);
+                    }
+                }
+
+                if (!rpcSuccess) {
+                    const errMsg = `${network.name} chunk ${ci}: All RPCs failed`;
                     result.errors.push(errMsg);
                     result.chunkStatuses.push({
                         network: network.name,
                         chunkIndex: ci,
                         status: 'error',
-                        error: `HTTP ${response.status}`,
+                        error: 'All RPCs failed'
                     });
                     networkOk = false;
-                    continue;
+                    // If one chunk fails completely, the network is likely unreachable or issues are severe
+                    // We continue to try other chunks or networks? 
+                    // Let's continue, maybe just one bad batch.
                 }
-
-                const data = await response.json();
-
-                if (Array.isArray(data)) {
-                    data.forEach((item: any, index: number) => {
-                        const balanceHex = item.result;
-                        if (balanceHex && balanceHex !== '0x0') {
-                            const balanceWei = BigInt(balanceHex);
-                            if (balanceWei > 0n) {
-                                const etherVal = Number(ethers.formatEther(balanceWei));
-                                if (etherVal > 0) {
-                                    result.balances.push({
-                                        address: chunk[index],
-                                        balance: etherVal,
-                                        symbol: network.ticker
-                                    });
-                                }
-                            }
-                        }
-                    });
-                }
-
-                result.chunkStatuses.push({
-                    network: network.name,
-                    chunkIndex: ci,
-                    status: 'ok',
-                });
-                successfulChunks++;
 
             } catch (e: any) {
                 if (e.name === 'AbortError') {

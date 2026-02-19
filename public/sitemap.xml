@@ -2,118 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
 
-  <!-- Home / Key Explorer -->
+  <!-- Home / Key Explorer — main indexable URL -->
   <url>
     <loc>https://ju1icyju.github.io/kripto-key-library/</loc>
-    <lastmod>2026-02-17</lastmod>
+    <lastmod>2026-02-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="ru" href="https://ju1icyju.github.io/kripto-key-library/" />
     <xhtml:link rel="alternate" hreflang="en" href="https://ju1icyju.github.io/kripto-key-library/" />
-  </url>
-
-  <!-- Multi-Address Balance Checker (traffic magnet) -->
-  <url>
-    <loc>https://ju1icyju.github.io/kripto-key-library/#checker</loc>
-    <lastmod>2026-02-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-
-  <!-- Turbo Scanner -->
-  <url>
-    <loc>https://ju1icyju.github.io/kripto-key-library/#turbo</loc>
-    <lastmod>2026-02-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- Whale Gallery -->
-  <url>
-    <loc>https://ju1icyju.github.io/kripto-key-library/#whales</loc>
-    <lastmod>2026-02-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- Key Decoder -->
-  <url>
-    <loc>https://ju1icyju.github.io/kripto-key-library/#decode</loc>
-    <lastmod>2026-02-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-
-  <!-- Museum of Finds -->
-  <url>
-    <loc>https://ju1icyju.github.io/kripto-key-library/#museum</loc>
-    <lastmod>2026-02-17</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-
-  <!-- Crypto Guide / Learn -->
-  <url>
-    <loc>https://ju1icyju.github.io/kripto-key-library/#learn</loc>
-    <lastmod>2026-02-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-
-  <!-- Probability Calculator -->
-  <url>
-    <loc>https://ju1icyju.github.io/kripto-key-library/#calc</loc>
-    <lastmod>2026-02-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-
-  <!-- Statistics -->
-  <url>
-    <loc>https://ju1icyju.github.io/kripto-key-library/#stats</loc>
-    <lastmod>2026-02-17</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-
-  <!-- Leaderboard -->
-  <url>
-    <loc>https://ju1icyju.github.io/kripto-key-library/#leaderboard</loc>
-    <lastmod>2026-02-17</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-
-  <!-- Achievements -->
-  <url>
-    <loc>https://ju1icyju.github.io/kripto-key-library/#achievements</loc>
-    <lastmod>2026-02-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-  <!-- Daily Lucky Page -->
-  <url>
-    <loc>https://ju1icyju.github.io/kripto-key-library/#daily</loc>
-    <lastmod>2026-02-17</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-  <!-- Crypto Unit Converter -->
-  <url>
-    <loc>https://ju1icyju.github.io/kripto-key-library/#converter</loc>
-    <lastmod>2026-02-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-
-  <!-- About / Disclaimer -->
-  <url>
-    <loc>https://ju1icyju.github.io/kripto-key-library/#about</loc>
-    <lastmod>2026-02-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ju1icyju.github.io/kripto-key-library/" />
   </url>
 
 </urlset>

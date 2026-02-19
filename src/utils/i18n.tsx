@@ -96,6 +96,7 @@ const translations = {
         turboRunning: 'Сканирование...',
         turboIdle: 'Ожидание запуска',
         turboCompleted: 'Завершено',
+        turboOpenPage: 'ОТКРЫТЬ СТРАНИЦУ',
 
         // Leaderboard
         navLeaderboard: 'РЕЙТИНГ',
@@ -112,7 +113,7 @@ const translations = {
         // Achievements
         navAchievements: '🏅',
         achievementsTitle: 'ДОСТИЖЕНИЯ',
-        achievementsSubtitle: 'Разблокируй все 11 бейджей',
+        achievementsSubtitle: 'Разблокируй все 10 бейджей',
         achievementsUnlocked: 'Разблокировано',
         achievementsLocked: 'Заблокировано',
         achFirstBlood: 'Первая кровь',
@@ -128,15 +129,13 @@ const translations = {
         achLuckySeven: 'Счастливое число',
         achLuckySevenDesc: 'Нажми «Рандом» 777 раз',
         achExplorer: 'Исследователь',
-        achExplorerDesc: 'Посети страницу с номером > 10⁷⁰',
+        achExplorerDesc: 'Посети страницу с номером > 10³²',
         achDataNerd: 'Дата-нёрд',
         achDataNerdDesc: 'Посети страницу статистики',
         achDailyWinner: 'Чемпион дня',
         achDailyWinnerDesc: 'Выполни дейли-челлендж',
         achPolyglot: 'Полиглот',
         achPolyglotDesc: 'Переключи язык',
-        achBotFriend: 'Друг ботов',
-        achBotFriendDesc: 'Используй Telegram-бота',
 
         // Daily Lucky Page
         dailyTitle: 'ИСПЫТАЙ УДАЧУ',
@@ -163,6 +162,8 @@ const translations = {
         guideTryIt: 'Попробуй сам:',
         guidePrivKey: 'Приватный ключ (hex):',
         guideResult: 'Результат:',
+        guideBack: '← Назад',
+        guideNext: 'Далее →',
 
         // Probability Calculator
         calcTitle: 'КАЛЬКУЛЯТОР ВЕРОЯТНОСТИ',
@@ -176,6 +177,12 @@ const translations = {
         calcPreset1: '1 человек',
         calcPreset2: 'Всё человечество',
         calcPreset3: 'Все компьютеры Земли',
+        calcKeysChecked: 'Проверено ключей',
+        calcCompInfinity: '🌌 ...1 атом среди ∞ вселенных',
+        calcCompUniverses: '🌌 ...1 атом среди {n} вселенных',
+        calcCompSand: '🏖️ ...1 песчинку среди 10^{n} пляжей',
+        calcCompPeople: '🎯 ...1 человека среди 10^{n} планет',
+        calcCompNear: '🔍 Пространство почти исчерпано!',
 
         // SEO
         pageTitle: 'Универсальная Библиотека Ключей — Поиск приватных ключей Bitcoin и Ethereum',
@@ -233,6 +240,9 @@ const translations = {
         // Converter
         converterTitle: 'КОНВЕРТЕР ЕДИНИЦ',
         converterSubtitle: 'Wei • Gwei • ETH • Satoshi • BTC',
+        converterSeoDesc: 'Бесплатный конвертер единиц криптовалют. Wei ↔ Gwei ↔ ETH для Ethereum, Satoshi (sats) ↔ BTC для Bitcoin. Мгновенное пересчёт в реальном времени.',
+        converterEthUnits: 'Единицы Ethereum',
+        converterBtcUnits: 'Единицы Bitcoin',
     },
     en: {
         // Layout
@@ -327,6 +337,7 @@ const translations = {
         turboRunning: 'Scanning...',
         turboIdle: 'Waiting to start',
         turboCompleted: 'Completed',
+        turboOpenPage: 'OPEN PAGE',
 
         // Leaderboard
         navLeaderboard: 'RANKING',
@@ -343,7 +354,7 @@ const translations = {
         // Achievements
         navAchievements: '🏅',
         achievementsTitle: 'ACHIEVEMENTS',
-        achievementsSubtitle: 'Unlock all 11 badges',
+        achievementsSubtitle: 'Unlock all 10 badges',
         achievementsUnlocked: 'Unlocked',
         achievementsLocked: 'Locked',
         achFirstBlood: 'First Blood',
@@ -359,15 +370,13 @@ const translations = {
         achLuckySeven: 'Lucky Seven',
         achLuckySevenDesc: 'Click Random 777 times',
         achExplorer: 'Explorer',
-        achExplorerDesc: 'Visit a page with number > 10⁷⁰',
+        achExplorerDesc: 'Visit a page with number > 10³²',
         achDataNerd: 'Data Nerd',
         achDataNerdDesc: 'Visit the statistics page',
         achDailyWinner: 'Daily Champion',
         achDailyWinnerDesc: 'Complete the daily challenge',
         achPolyglot: 'Polyglot',
         achPolyglotDesc: 'Switch language',
-        achBotFriend: 'Bot Friend',
-        achBotFriendDesc: 'Use the Telegram bot',
 
         // Daily Lucky Page
         dailyTitle: 'TRY YOUR LUCK',
@@ -394,6 +403,8 @@ const translations = {
         guideTryIt: 'Try it yourself:',
         guidePrivKey: 'Private key (hex):',
         guideResult: 'Result:',
+        guideBack: '← Back',
+        guideNext: 'Next →',
 
         // Probability Calculator
         calcTitle: 'PROBABILITY CALCULATOR',
@@ -407,6 +418,12 @@ const translations = {
         calcPreset1: '1 person',
         calcPreset2: 'All humanity',
         calcPreset3: 'All computers on Earth',
+        calcKeysChecked: 'Keys checked',
+        calcCompInfinity: '🌌 ...1 atom among ∞ universes',
+        calcCompUniverses: '🌌 ...1 atom among {n} universes',
+        calcCompSand: '🏖️ ...1 grain of sand among 10^{n} beaches',
+        calcCompPeople: '🎯 ...1 person among 10^{n} planets',
+        calcCompNear: '🔍 The space is almost exhausted!',
 
         // SEO
         pageTitle: 'Universal Key Library — Search Bitcoin & Ethereum Private Keys',
@@ -464,6 +481,9 @@ const translations = {
         // Converter
         converterTitle: 'UNIT CONVERTER',
         converterSubtitle: 'Wei • Gwei • ETH • Satoshi • BTC',
+        converterSeoDesc: 'Free crypto unit converter. Wei ↔ Gwei ↔ ETH for Ethereum, Satoshi (sats) ↔ BTC for Bitcoin. Instant real-time calculation.',
+        converterEthUnits: 'Ethereum Units',
+        converterBtcUnits: 'Bitcoin Units',
     },
 };
 

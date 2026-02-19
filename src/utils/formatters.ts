@@ -1,5 +1,10 @@
 export const formatBigInt = (value: bigint | string): string => {
-    return value.toLocaleString('en-US').replace(/,/g, ' ');
+    try {
+        const big = typeof value === 'string' ? BigInt(value) : value;
+        return big.toLocaleString('en-US').replace(/,/g, ' ');
+    } catch {
+        return String(value);
+    }
 };
 
 export const shortenAddress = (address: string, chars = 4): string => {

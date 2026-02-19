@@ -1,15 +1,16 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Zap, Play, Square, Activity, Gauge, Trash2, DollarSign, Settings2, ExternalLink, AlertTriangle } from 'lucide-react';
 import { useLang } from '../utils/i18n';
-import { generateWallet, MAX_PAGE, ROWS_PER_PAGE } from '../utils/crypto';
+import { generateEthAddress, MAX_PAGE, ROWS_PER_PAGE } from '../utils/crypto';
 import { checkBalances, AVAILABLE_NETWORKS, type SpeedMode, type BalanceResult } from '../utils/api';
-import { recordEliminated, incrementRandomClicks, recordFoundWallet, recordBatchEliminated } from '../utils/supabase';
+import { incrementRandomClicks, recordFoundWallet, recordBatchEliminated } from '../utils/supabase';
 import { trackElimination, trackTurboUsed } from '../utils/achievements';
 
 interface TurboResult {
     page: string;
     status: 'verified' | 'error' | 'found';
     balances: BalanceResult[];
+    networksVerified: string[];
     timestamp: number;
 }
 
@@ -66,11 +67,11 @@ export const TurboPanel: React.FC = () => {
     const scanPage = useCallback(async (page: string, signal: AbortSignal): Promise<TurboResult | null> => {
         if (signal.aborted) return null;
 
+        // generateEthAddress skips BTC/secp256k1 — Turbo only checks ETH/BNB
         const ethAddresses: string[] = [];
         for (let i = 0; i < Number(ROWS_PER_PAGE); i++) {
             try {
-                const w = generateWallet(i, page);
-                ethAddresses.push(w.ethAddress);
+                ethAddresses.push(generateEthAddress(i, page));
             } catch {
                 // skip
             }
@@ -81,12 +82,11 @@ export const TurboPanel: React.FC = () => {
             if (result.aborted) return null;
 
             if (result.balances.length > 0) {
-                return { page, status: 'found', balances: result.balances, timestamp: Date.now() };
+                return { page, status: 'found', balances: result.balances, networksVerified: result.networksVerified, timestamp: Date.now() };
             } else if (result.allVerified) {
-                recordEliminated(page, result.networksVerified);
-                return { page, status: 'verified', balances: [], timestamp: Date.now() };
+                return { page, status: 'verified', balances: [], networksVerified: result.networksVerified, timestamp: Date.now() };
             } else {
-                return { page, status: 'error', balances: [], timestamp: Date.now() };
+                return { page, status: 'error', balances: [], networksVerified: [], timestamp: Date.now() };
             }
         } catch {
             return null;
@@ -139,8 +139,8 @@ export const TurboPanel: React.FC = () => {
                 if (r.status === 'verified') {
                     setEliminatedCount(prev => prev + 1);
                     trackElimination();
-                    // Add to batch buffer
-                    eliminatedBufferRef.current.push({ page: r.page, networks: ['ETH', 'BNB'] }); // Turbo only checks these
+                    // Add to batch buffer with actual verified networks
+                    eliminatedBufferRef.current.push({ page: r.page, networks: r.networksVerified });
                     if (eliminatedBufferRef.current.length >= 50) {
                         flushEliminations();
                     }
@@ -158,6 +158,7 @@ export const TurboPanel: React.FC = () => {
                     saved.unshift({
                         page: r.page,
                         balances: r.balances,
+                        networksVerified: r.networksVerified,
                         timestamp: r.timestamp,
                     });
                     localStorage.setItem('ukl_turbo_found', JSON.stringify(saved));
@@ -253,7 +254,7 @@ export const TurboPanel: React.FC = () => {
                                     className="flex items-center gap-2 px-3 py-1.5 bg-terminal-warning/20 hover:bg-terminal-warning/40 text-terminal-warning rounded border border-terminal-warning/50 text-xs font-bold uppercase tracking-wider transition-all"
                                 >
                                     <ExternalLink className="w-3.5 h-3.5" />
-                                    OPEN PAGE
+                                    {t.turboOpenPage}
                                 </button>
                             </div>
                         </div>

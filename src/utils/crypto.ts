@@ -13,6 +13,17 @@ const ECPair = ECPairFactory(ecc);
 
 export const ROWS_PER_PAGE = 128n;
 
+/**
+ * Fast path: generate only the ETH address for a given row + page.
+ * Skips BTC derivation (secp256k1 WASM) entirely — use this in Turbo mode
+ * where BTC is never checked, for ~30-50% speed improvement.
+ */
+export const generateEthAddress = (rowIndex: number, pageNumber: string): string => {
+    const totalOffset = (BigInt(pageNumber) - 1n) * ROWS_PER_PAGE + BigInt(rowIndex) + 1n;
+    const hex = totalOffset.toString(16).padStart(64, '0');
+    return new ethers.Wallet('0x' + hex).address;
+};
+
 export const generateWallet = (rowIndex: number, pageNumber: string): { privateKey: string, ethAddress: string, btcAddress: string } => {
     const pageBigInt = BigInt(pageNumber);
     // Formula: (Page - 1) * 128 + RowIndex
