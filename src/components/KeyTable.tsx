@@ -36,6 +36,12 @@ export const KeyTable: React.FC<KeyTableProps> = ({ pageNumber, onEliminated }) 
         return data;
     }, [pageNumber]);
 
+    // Stable random durations — computed once per page, not on every re-render
+    const scanDurations = useMemo(
+        () => Array.from({ length: Number(ROWS_PER_PAGE) }, () => 1000 + Math.random() * 2000),
+        [pageNumber]
+    );
+
     useEffect(() => {
         if (abortRef.current) {
             abortRef.current.abort();
@@ -239,7 +245,7 @@ export const KeyTable: React.FC<KeyTableProps> = ({ pageNumber, onEliminated }) 
                                         {balanceDisplay ? (
                                             balanceDisplay
                                         ) : (
-                                            <ScanEffect key={`${scanKey}-${idx}`} duration={1000 + Math.random() * 2000} />
+                                            <ScanEffect key={`${scanKey}-${idx}`} duration={scanDurations[idx]} />
                                         )}
                                     </td>
                                 </tr>

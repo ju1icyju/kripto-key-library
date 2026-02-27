@@ -5,9 +5,9 @@ export const NETWORKS = [
         name: 'ETH',
         urls: [
             'https://rpc.ankr.com/eth',
-            'https://eth.llamarpc.com',
             'https://ethereum-rpc.publicnode.com',
             'https://eth.drpc.org',
+            'https://rpc.payload.de',
         ],
         ticker: 'ETH'
     },
@@ -17,7 +17,7 @@ export const NETWORKS = [
             'https://bsc-dataseed1.binance.org/',
             'https://rpc.ankr.com/bsc',
             'https://bsc-rpc.publicnode.com',
-            'https://binance.llamarpc.com',
+            'https://bsc.drpc.org',
         ],
         ticker: 'BNB'
     }
@@ -68,6 +68,13 @@ const SPEED_DELAYS: Record<SpeedMode, number> = {
     turbo: 30,
 };
 
+// Timeout per speed mode — turbo needs shorter timeouts to avoid request pile-up
+const SPEED_TIMEOUTS: Record<SpeedMode, number> = {
+    normal: 10000,
+    fast: 7000,
+    turbo: 5000,
+};
+
 /**
  * Race a single RPC request against multiple URLs simultaneously.
  * Returns the parsed JSON from the first successful response.
@@ -89,6 +96,8 @@ const raceRpcRequest = async (
         // Combine user signal + per-request timeout
         const combined = new AbortController();
         const abortCombined = () => combined.abort();
+
+        // Check upfront before adding listeners
         if (signal?.aborted || controller.signal.aborted) {
             combined.abort();
         } else {
@@ -104,6 +113,9 @@ const raceRpcRequest = async (
                 signal: combined.signal,
             });
             clearTimeout(timeoutId);
+            // Clean up listeners
+            signal?.removeEventListener('abort', abortCombined);
+            controller.signal.removeEventListener('abort', abortCombined);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
             // Cancel other in-flight requests
@@ -111,6 +123,9 @@ const raceRpcRequest = async (
             return data;
         } catch (e: any) {
             clearTimeout(timeoutId);
+            // Clean up listeners
+            signal?.removeEventListener('abort', abortCombined);
+            controller.signal.removeEventListener('abort', abortCombined);
             if (e.name === 'AbortError' && signal?.aborted) {
                 // User-initiated abort — propagate immediately
                 throw e;
@@ -119,24 +134,18 @@ const raceRpcRequest = async (
         }
     };
 
-    // Fire requests to all URLs, take the first success
-    // Shuffle URLs to distribute load
-    const shuffled = urls
-        .map((url, i) => ({ url, i }))
-        .sort(() => Math.random() - 0.5);
-
-    const raceUrls = shuffled.slice(0, 2); // Race top 2
-
+    // Race ALL URLs simultaneously — first successful response wins, losers are cancelled.
+    // This is more reliable than racing just 2: if any URL is broken (adblock, CORS, geo),
+    // the others still succeed. Overhead is minimal since losers are aborted immediately.
     try {
-        return await Promise.any(raceUrls.map(({ url, i }) => makeRequest(url, i)));
+        return await Promise.any(urls.map((url, i) => makeRequest(url, i)));
     } catch (aggErr: any) {
         // If user aborted, propagate AbortError
         if (signal?.aborted) {
-            const abortErr = new DOMException('Aborted', 'AbortError');
-            throw abortErr;
+            throw new DOMException('Aborted', 'AbortError');
         }
-        // All failed
-        const errors = aggErr.errors ?? [aggErr];
+        // All URLs failed
+        const errors = (aggErr as AggregateError).errors ?? [aggErr];
         throw new Error(`All RPCs failed: ${errors.map((e: any) => e.message).join(', ')}`);
     }
 };
@@ -150,6 +159,7 @@ const checkNetworkBalances = async (
     chunks: string[][],
     signal: AbortSignal | undefined,
     delay: number,
+    timeoutMs: number,
 ): Promise<{
     balances: BalanceResult[];
     chunkStatuses: ChunkStatus[];
@@ -171,7 +181,7 @@ const checkNetworkBalances = async (
 
         try {
             const payload = createBatchPayload(chunk, 1);
-            const data = await raceRpcRequest(network.urls, payload, signal);
+            const data = await raceRpcRequest(network.urls, payload, signal, timeoutMs);
 
             if (Array.isArray(data)) {
                 data.forEach((item: any, index: number) => {
@@ -232,6 +242,7 @@ export const checkBalances = async (
     const speed = options?.speed ?? 'normal';
     const enabledNetworks = options?.networks;
     const delay = SPEED_DELAYS[speed];
+    const timeoutMs = SPEED_TIMEOUTS[speed];
 
     const result: CheckResult = {
         balances: [],
@@ -255,7 +266,7 @@ export const checkBalances = async (
 
     // Check all networks in PARALLEL
     const networkResults = await Promise.all(
-        activeNetworks.map(network => checkNetworkBalances(network, chunks, signal, delay))
+        activeNetworks.map(network => checkNetworkBalances(network, chunks, signal, delay, timeoutMs))
     );
 
     // Merge results from all networks
