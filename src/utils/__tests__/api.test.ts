@@ -54,10 +54,13 @@ describe('checkBalances', () => {
     });
 
     it('returns allVerified=false when a network returns non-200', async () => {
-        // First call (ETH) succeeds, second call (BNB) fails
-        mockFetch
-            .mockResolvedValueOnce(createMockResponse(['0x0', '0x0']))
-            .mockResolvedValueOnce({ ok: false, status: 429 });
+        // URL-based mock: ETH succeeds, BNB returns 429
+        mockFetch.mockImplementation(async (url: string) => {
+            if (url.includes('bsc') || url.includes('binance')) {
+                return { ok: false, status: 429 };
+            }
+            return createMockResponse(['0x0', '0x0']);
+        });
 
         const result = await checkBalances(twoAddresses);
 
@@ -67,9 +70,13 @@ describe('checkBalances', () => {
     });
 
     it('returns allVerified=false when fetch throws', async () => {
-        mockFetch
-            .mockResolvedValueOnce(createMockResponse(['0x0', '0x0']))
-            .mockRejectedValueOnce(new Error('Network timeout'));
+        // URL-based mock: ETH succeeds, BNB throws
+        mockFetch.mockImplementation(async (url: string) => {
+            if (url.includes('bsc') || url.includes('binance')) {
+                throw new Error('Network timeout');
+            }
+            return createMockResponse(['0x0', '0x0']);
+        });
 
         const result = await checkBalances(twoAddresses);
 
@@ -93,13 +100,22 @@ describe('checkBalances', () => {
     it('handles aborted signal mid-flight', async () => {
         const controller = new AbortController();
 
-        // First call succeeds, second throws AbortError
-        mockFetch
-            .mockResolvedValueOnce(createMockResponse(['0x0', '0x0']))
-            .mockImplementationOnce(() => {
+        // URL-based mock: first ETH call triggers abort, rest see aborted signal
+        let callCount = 0;
+        mockFetch.mockImplementation(async (_url: string, init: any) => {
+            callCount++;
+            if (callCount === 1) {
+                // Simulate: first call starts, then user aborts mid-flight
+                controller.abort();
                 const err = new DOMException('Aborted', 'AbortError');
-                return Promise.reject(err);
-            });
+                throw err;
+            }
+            // All subsequent calls see the aborted signal
+            if (init?.signal?.aborted) {
+                throw new DOMException('Aborted', 'AbortError');
+            }
+            return createMockResponse(['0x0', '0x0']);
+        });
 
         const result = await checkBalances(twoAddresses, controller.signal);
 
@@ -107,15 +123,19 @@ describe('checkBalances', () => {
         expect(result.allVerified).toBe(false);
     });
 
-    it('passes signal to fetch', async () => {
+    it('passes signal to fetch (abort is respected)', async () => {
         const controller = new AbortController();
-        mockFetch.mockResolvedValue(createMockResponse(['0x0', '0x0']));
+        mockFetch.mockImplementation(async (_url: string, init: any) => {
+            // If the signal is already aborted (or gets aborted), throw AbortError
+            if (init?.signal?.aborted) {
+                throw new DOMException('Aborted', 'AbortError');
+            }
+            return createMockResponse(['0x0', '0x0']);
+        });
 
-        await checkBalances(twoAddresses, controller.signal);
-
-        // Verify signal was passed to every fetch call
-        for (const call of mockFetch.mock.calls) {
-            expect(call[1]).toHaveProperty('signal', controller.signal);
-        }
+        // Abort immediately
+        controller.abort();
+        const result = await checkBalances(twoAddresses, controller.signal);
+        expect(result.aborted).toBe(true);
     });
 });

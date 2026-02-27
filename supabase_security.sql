@@ -135,3 +135,23 @@ CREATE POLICY "Anyone can read found wallets"
 
 CREATE POLICY "Anyone can insert found wallets"
     ON found_wallets FOR INSERT WITH CHECK (true);
+
+-- 8. Deduplicate existing found_wallets and add UNIQUE constraint
+-- Delete duplicates, keeping the earliest entry per (page_number, address)
+DELETE FROM found_wallets
+WHERE id NOT IN (
+    SELECT MIN(id) FROM found_wallets GROUP BY page_number, address
+);
+
+-- Add UNIQUE constraint to prevent future duplicates
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname = 'found_wallets_page_address_unique'
+    ) THEN
+        ALTER TABLE found_wallets
+            ADD CONSTRAINT found_wallets_page_address_unique
+            UNIQUE (page_number, address);
+    END IF;
+END $$;

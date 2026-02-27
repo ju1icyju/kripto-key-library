@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 // Returns a random float string mimicking currency
 const randomBal = () => (Math.random() * 100).toFixed(2);
@@ -9,23 +9,35 @@ interface ScanEffectProps {
 }
 
 export const ScanEffect: React.FC<ScanEffectProps> = ({ finalValue = "0.00", duration = 1500 }) => {
-    const [display, setDisplay] = useState("0.00");
+    const [display, setDisplay] = useState(randomBal);
     const [done, setDone] = useState(false);
+    const startRef = useRef(0);
+    const lastUpdateRef = useRef(0);
 
     useEffect(() => {
-        let startTime = Date.now();
-        const interval = setInterval(() => {
-            const elapsed = Date.now() - startTime;
+        startRef.current = performance.now();
+        lastUpdateRef.current = 0;
+        setDone(false);
+
+        let rafId: number;
+
+        const tick = (now: number) => {
+            const elapsed = now - startRef.current;
             if (elapsed > duration) {
                 setDisplay(finalValue);
                 setDone(true);
-                clearInterval(interval);
-            } else {
-                setDisplay(randomBal());
+                return;
             }
-        }, 150);
+            // Throttle visual updates to ~80ms intervals (12 fps) for readable numbers
+            if (now - lastUpdateRef.current > 80) {
+                setDisplay(randomBal());
+                lastUpdateRef.current = now;
+            }
+            rafId = requestAnimationFrame(tick);
+        };
 
-        return () => clearInterval(interval);
+        rafId = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(rafId);
     }, [finalValue, duration]);
 
     return (

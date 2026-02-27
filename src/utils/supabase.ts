@@ -197,12 +197,12 @@ export const recordFoundWallet = async (
     if (!rateLimit('found_wallet', 5000)) return;
 
     try {
-        await supabase.from('found_wallets').insert({
+        await supabase.from('found_wallets').upsert({
             page_number: pageNumber,
             address,
             balance,
             symbol: symbol.slice(0, 10),
-        });
+        }, { onConflict: 'page_number,address', ignoreDuplicates: true });
     } catch {
         // table might not exist yet — silent fail
     }
